@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 18:59:29 $
- * Version:  $Revision: 1.10 $
- * ID:       $Id: fastereo.c,v 1.10 2004/04/19 18:59:29 arutha Exp $
+ * Date:     $Date: 2004/04/26 20:24:40 $
+ * Version:  $Revision: 1.11 $
+ * ID:       $Id: fastereo.c,v 1.11 2004/04/26 20:24:40 arutha Exp $
  * Comments:
  */
 /**
@@ -99,7 +99,7 @@ main(int argc,
                 break;
             case 'z':
                 /* display in OpenGL */
-                g_zoom = strtod(optarg, (char **)NULL);
+                g_zoomim = strtod(optarg, (char **)NULL);
                 break;
             case 'a':
                 /* nombre de keyframes dans l'animation OpenGL */

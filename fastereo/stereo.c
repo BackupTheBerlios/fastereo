@@ -2,9 +2,9 @@
  * File:     $RCSfile: stereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 19:03:34 $
- * Version:  $Revision: 1.1 $
- * ID:       $Id: stereo.c,v 1.1 2004/04/19 19:03:34 arutha Exp $
+ * Date:     $Date: 2004/04/26 20:24:40 $
+ * Version:  $Revision: 1.2 $
+ * ID:       $Id: stereo.c,v 1.2 2004/04/26 20:24:40 arutha Exp $
  * Comments:
  */
 /**
@@ -42,7 +42,7 @@ interpol(float position, char *image, char *depth_map)
     unsigned char *im;
     unsigned char *labels;
     unsigned char label;
-    float range = root->dmax - root->dmin;
+    float range = g_dmax - g_dmin;
     float depth;
     float campos;
     float newpos;

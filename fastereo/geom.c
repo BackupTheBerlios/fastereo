@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 18:59:30 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: geom.c,v 1.4 2004/04/19 18:59:30 arutha Exp $
+ * Date:     $Date: 2004/04/26 20:24:40 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: geom.c,v 1.5 2004/04/26 20:24:40 arutha Exp $
  * Comments:
  */
 /**
@@ -42,7 +42,6 @@ int
 inv_matrix4(float min[4][4], float mout[4][4])
 {
     Edbg(("inv_matrix4(min, mout)"));
-    int ii, jj;
     float det;
 
     float a = min[0][0]*min[1][1] - min[0][1]*min[1][0];
@@ -82,14 +81,6 @@ inv_matrix4(float min[4][4], float mout[4][4])
     mout[1][3] = + min[2][0]*f - min[2][2]*c + min[2][3]*b;
     mout[2][3] = - min[2][0]*e + min[2][1]*c - min[2][3]*a;
     mout[3][3] = + min[2][0]*d - min[2][1]*b + min[2][2]*a;
-
-    for(ii = 0; ii < 4; ii++)
-    {
-        for(jj = 0; jj < 4; jj++)
-        {
-            mout[ii][jj] /= det;
-        }
-    }
 
     Rdbg(("inv_matrix4 RETURN_SUCCESS"));
     return RETURN_SUCCESS;

@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 18:59:29 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: display.h,v 1.4 2004/04/19 18:59:29 arutha Exp $
+ * Date:     $Date: 2004/04/26 20:24:40 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: display.h,v 1.5 2004/04/26 20:24:40 arutha Exp $
  */
 /**
  * @file display.h
@@ -38,43 +38,22 @@
 /** couleur du fond */
 #define BG_COLOR 0.0, 0.0, 0.0, 0.0
 
-#define STEP_Z 1.3
-
-/** angle d'ouverture de la caméra */
-#define EYE_THETA 90
-/** near clipping plane */
-#define NEAR_PLANE 10.0
-/** far clipping plane */
-#define FAR_PLANE 1000.0
-/** position de la caméra */
-#define EYE_POS {0.0, 0.0, 0.0, 1.0}
-/** point de référence */
-#define REF_POINT {0.0, 0.0, -NEAR_PLANE, 1.0}
-/** vecteur UP pour la caméra */
-#define EYE_UP {0.0, 1.0, 0.0}
-
 /** nombre de keyframes par défaut dans l'animation */
 #define ANIM_NB_KEYFRAMES 10
 
 void init_display();
 void start_display(void);
 void init_gl(void);
-void construct_scene(void);
-int compute_cam_position(Camera_t *cam);
-void display_cam(Camera_t *pcam,
-                 float hscreen,
-                 float wscreen,
-                 float step_x,
-                 float step_y);
+void construct_scene(char destroyDL);
+void display_cam(Camera_t *pcam);
 void set_color(Color_t *color, Color_t *tint);
 void refresh_display(void);
 void reshape_display(SDL_Event *event);
 void destroy_display(void);
 void mouse_event(SDL_Event *event);
-void deprojGL_point(Point3d_t *point, Point3d_t *eye, float step_z, 
-                    float label);
+void keyboard_event(SDL_Event *event);
 
-extern float g_zoom;
+extern float g_zoomim;
 extern GLuint g_scene;
 extern int g_anim_nb_keyframes;
 
