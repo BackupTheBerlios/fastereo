@@ -1,8 +1,10 @@
 /*
- * File:     commands.h
+ * File:     $RCSfile: commands.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
- * Date:     12 april 2004
- * Version:  0.1
+ *               from University of Montreal
+ * Date:     $Date: 2004/04/13 19:07:20 $
+ * Version:  $Revision: 1.2 $
+ * ID:       $Id: commands.h,v 1.2 2004/04/13 19:07:20 arutha Exp $
  * Comments:
  */
 
@@ -26,17 +28,19 @@ typedef enum {
     OPENGL = 3
 } action_t;
 
-int simple_image(const stereo_mode_t mode,
-                 const char *start_im,
-                 const char *start_dm,
-                 const char *end_im,
-                 const char *end_dm,
-                 const int nb_labels,
-                 const float distance,
-                 const float interpol,
-                 const char *result_im,
-                 const char *result_dm);
-int merge_depth_maps();
+int execute_commands(const char *file_name);
+
+// int simple_image(const stereo_mode_t mode,
+//                  const char *start_im,
+//                  const char *start_dm,
+//                  const char *end_im,
+//                  const char *end_dm,
+//                  const int nb_labels,
+//                  const float distance,
+//                  const float interpol,
+//                  const char *result_im,
+//                  const char *result_dm);
+// int merge_depth_maps();
 
 #endif /* _COMMANDS_H_ */
 

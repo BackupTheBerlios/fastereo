@@ -1,8 +1,10 @@
 /*
- * File:     fastereo.h
+ * File:     $RCSfile: fastereo.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
- * Date:     12 april 2004
- * Version:  0.1
+ *               from University of Montreal
+ * Date:     $Date: 2004/04/13 19:07:20 $
+ * Version:  $Revision: 1.2 $
+ * ID:       $Id: fastereo.h,v 1.2 2004/04/13 19:07:20 arutha Exp $
  * Comments:
  */
 
