@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.7 $
- * ID:       $Id: cameras.h,v 1.7 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/04/30 14:42:55 $
+ * Version:  $Revision: 1.8 $
+ * ID:       $Id: cameras.h,v 1.8 2004/04/30 14:42:55 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -66,7 +66,8 @@ int load_depth_map(Camera_t *cam,
                    const char *file_name, 
                    int nb_labels);
 Camera_t *get_camera(int id);
-int img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol);
+int img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol, 
+                  char dm);
 Point2d_t proj(Camera_t *cam, Point3d_t ptw);
 Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth);
 float label2depth(Camera_t *pcam, int label);

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.7 $
- * ID:       $Id: cameras.c,v 1.7 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/04/30 14:42:55 $
+ * Version:  $Revision: 1.8 $
+ * ID:       $Id: cameras.c,v 1.8 2004/04/30 14:42:55 arutha Exp $
  * Comments:
  */
 /**
@@ -459,21 +459,37 @@ get_camera(int id)
  * Donne la couleur d'un pixel dans l'image
  */
 int
-img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol)
+img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol, 
+              char dm)
 {
-    int nb_colors = pcam->ii.ZSize;
-    int width = pcam->ii.XSize;
+    int nb_colors;
+    int width;
     int k;
     float moy = 0.0;
+    imginfo *pii;
 
     if (NULL == pcam) return RETURN_FAILED;
-    if (NULL == pcam->ii.Data) return RETURN_FAILED;
+
+    if (dm)
+    {
+        if (NULL == pcam->labels.Data) return RETURN_FAILED;
+        pii = &(pcam->labels);
+    }
+    else
+    {
+        if (NULL == pcam->ii.Data) return RETURN_FAILED;
+        pii = &(pcam->ii);
+    }
+
+    nb_colors = pii->ZSize;
+    width = pii->XSize;
+
 
     if(interpol > 0.0)
     {
         for (k=0; k<nb_colors; k++)
         {
-            (*color)[k] = InterpoleImg(i+interpol, j+interpol, k, &(pcam->ii));
+            (*color)[k] = InterpoleImg(i+interpol, j+interpol, k, pii);
             (*color)[k] /= 255.0;
             moy += (*color)[k];
         }
@@ -482,7 +498,7 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol)
     {
         for (k=0; k<nb_colors; k++)
         {
-            (*color)[k] = pcam->ii.Data[(j*width+i)*nb_colors+k];
+            (*color)[k] = pii->Data[(j*width+i)*nb_colors+k];
             (*color)[k] /= 255.0;
             moy += (*color)[k];
         }
@@ -496,6 +512,15 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol)
         (*color)[k] = moy;
     }
     if(nb_colors < 4) (*color)[k] = 1.0;
+
+    if (dm)
+    {
+        for (k=0; k<3; k++)
+        {
+            (*color)[k] = 
+                ((int)(255*(*color)[k]/(g_nb_labels-1.0)*255+0.5))/255.0;
+        }
+    }
 
     return RETURN_SUCCESS;
 }

@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 18:59:29 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: commands.c,v 1.4 2004/04/19 18:59:29 arutha Exp $
+ * Date:     $Date: 2004/04/30 14:42:55 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: commands.c,v 1.5 2004/04/30 14:42:55 arutha Exp $
  * Comments:
  */
 /**
@@ -53,7 +53,7 @@ execute_commands(const char *file_name)
 
         if (!is_comment(buffer))
         {
-            printf("=== Commande: %s\n", buffer);
+            /* printf("=== Commande: %s\n", buffer); */
 
             /* commande 'cameras' */
             if (strncmp(buffer, "cameras ", 8) == 0)
@@ -85,7 +85,7 @@ execute_commands(const char *file_name)
                 fprintf(stderr, "Commande non reconnue!! %s\n", buffer);
             }
 
-            printf("\n");
+            /* printf("\n"); */
         }
     }
 

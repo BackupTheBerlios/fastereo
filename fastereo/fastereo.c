@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.11 $
- * ID:       $Id: fastereo.c,v 1.11 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/04/30 14:42:55 $
+ * Version:  $Revision: 1.12 $
+ * ID:       $Id: fastereo.c,v 1.12 2004/04/30 14:42:55 arutha Exp $
  * Comments:
  */
 /**
@@ -56,11 +56,21 @@ print_usage(void)
     printf("usage: fastereo <file.commands>\n"
            "\n"
            "options:\n"
-           "  -h\t\t\taffiche cet écran\n"
-           "  -g\t\t\tdisplay in OpenGL\n"
-           "  -a <nb_keyframes>\tnombre de keyframes dans l'animation en OpenGL"
-           " (plus la valeur est petite, plus l'animation est rapide)\n"
-           "  -z <zoom>\t\tzoom à appliquer aux images\n");
+           "  -h\t\t\tAffiche cet écran\n"
+           "  -g\t\t\tAffichage OpenGL\n"
+           "  -a <nb_keyframes>\tNombre de keyframes dans l'animation en OpenGL"
+           " (plus la valeur est petite, plus le mouvement est rapide)\n"
+           "  -z <zoom>\t\tZoom à appliquer aux images\n"
+           "\n"
+           "Touches au clavier:\n"
+           "  ESC\t\t\tQuitter l'application\n"
+           "  Z\t\t\tPasser en plein écran ou revenir en mode fenêtré\n"
+           "  A\t\t\tAnime la scène\n"
+           "  S\t\t\tActive/Désactive les teintes\n"
+           "  D\t\t\tAfficher ou non les cartes de profondeurs à la place des images\n"
+           "  M\t\t\tChanger de mode d'affichage: carrés ou triangles\n"
+           "  F1, F2, etc\t\tAfficher ou non les images 1, 2, etc.\n"
+           );
     Rdbg(("print_usage"));
 }
 
@@ -71,8 +81,7 @@ print_usage(void)
  * @return program exit code
  */
 int
-main(int argc, 
-     char *argv[])
+main(int argc, char *argv[])
 {
     /* debug trace start */
     Edbg(("main(argc=%d, argv=%s)", argc, argv[0]));

@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: display.c,v 1.5 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/04/30 14:42:55 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: display.c,v 1.6 2004/04/30 14:42:55 arutha Exp $
  * Comments:
  */
 /**
@@ -63,6 +63,8 @@ char g_fullscreen = FALSE;
 char g_shading = TRUE;
 /** Indique le mode sélectionné: triangles ou carrés */
 char g_mode = 0;
+/** Indique si on affiche les cartes de profondeurs à la place des image */
+char g_depthmaps = FALSE;
 
 /** Couleur blanche */
 GLfloat g_white_color[] = {1.0, 1.0, 1.0, 1.0};
@@ -258,7 +260,7 @@ display_cam(Camera_t *pcam)
                     /* Dprintf((1,"label1: %d\n", labels->Data[j*labels->XSize+i])); */
 
                     /* on récupère les couleurs des points */
-                    img_get_color(&color_p1, pcam, i  , j  , 0.0);
+                    img_get_color(&color_p1, pcam, i  , j  , 0.0, g_depthmaps);
                     /* Dprintf((1,"c1: (%f,%f,%f,%f)\n", color_p1[0], color_p1[1], */
                     /*          color_p1[2], color_p1[3]));                        */
 
@@ -298,11 +300,11 @@ display_cam(Camera_t *pcam)
                     /* Dprintf((1,"label5: %f\n", InterpoleImg(i+0.5, j+0.5, 0, labels)));     */
 
                     /* on récupère les couleurs des points */
-                    img_get_color(&color_p1, pcam, i  , j  , 0.0);
-                    img_get_color(&color_p2, pcam, i+1, j  , 0.0);
-                    img_get_color(&color_p3, pcam, i  , j+1, 0.0);
-                    img_get_color(&color_p4, pcam, i+1, j+1, 0.0);
-                    img_get_color(&color_p5, pcam, i  , j  , 0.5);
+                    img_get_color(&color_p1, pcam, i  , j  , 0.0, g_depthmaps);
+                    img_get_color(&color_p2, pcam, i+1, j  , 0.0, g_depthmaps);
+                    img_get_color(&color_p3, pcam, i  , j+1, 0.0, g_depthmaps);
+                    img_get_color(&color_p4, pcam, i+1, j+1, 0.0, g_depthmaps);
+                    img_get_color(&color_p5, pcam, i  , j  , 0.5, g_depthmaps);
                     /* Dprintf((1,"c1: (%f,%f,%f,%f)\n", color_p1[0], color_p1[1], */
                     /*          color_p1[2], color_p1[3]));                        */
                     /* Dprintf((1,"c2: (%f,%f,%f,%f)\n", color_p2[0], color_p2[1], */
@@ -542,13 +544,13 @@ keyboard_event(SDL_Event *event)
         if (TRUE == g_animate)
         {
             g_animate = FALSE;
-            printf("Animate finished!\n");
+            printf("Arrêt de l'animation!\n");
         }
         else
         {
             g_animate = TRUE;
-            g_anim_keyframe = 0;
-            printf("Animate...\n");
+            /* g_anim_keyframe = 0; */
+            printf("Animation...\n");
         }
     }
     else if (SDLK_s == event->key.keysym.sym)
@@ -556,22 +558,49 @@ keyboard_event(SDL_Event *event)
         if (TRUE == g_shading)
         {
             g_shading = FALSE;
-            printf("Disabling shading...\n");
+            printf("Scène sans les teintes... ");
             construct_scene(TRUE);
-            printf("Shading disabled!\n");
+            printf("[done]\n");
         }
         else
         {
             g_shading = TRUE;
-            printf("Enabling shading...\n");
+            printf("Scène avec les teintes... ");
             construct_scene(TRUE);
-            printf("Shading enabled!\n");
+            printf("[done]\n");
         }
     }
     else if (SDLK_m == event->key.keysym.sym)
     {
         g_mode = (g_mode+1)%2;
+        switch (g_mode)
+        {
+            case 0:
+                printf("Scène avec les carrés... ");
+                break;
+            case 1:
+                printf("Scène avec les triangles... ");
+                break;
+        }
         construct_scene(TRUE);
+        printf("[done]\n");
+    }
+    else if (SDLK_d == event->key.keysym.sym)
+    {
+        if (TRUE == g_depthmaps)
+        {
+            g_depthmaps = FALSE;
+            printf("Scène avec les images... ");
+            construct_scene(TRUE);
+            printf("[done]\n");
+        }
+        else
+        {
+            g_depthmaps = TRUE;
+            printf("Scène avec les cartes de profondeurs... ");
+            construct_scene(TRUE);
+            printf("[done]\n");
+        }
     }
     else if (SDLK_F1 == event->key.keysym.sym)
     {
@@ -583,6 +612,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°1\n");
+            }
+            else
+            {
+                printf("Caméra n°1 cachée!\n");
+            }
         }
     }
     else if (SDLK_F2 == event->key.keysym.sym)
@@ -595,6 +632,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°2\n");
+            }
+            else
+            {
+                printf("Caméra n°2 cachée!\n");
+            }
         }
     }
     else if (SDLK_F3 == event->key.keysym.sym)
@@ -607,6 +652,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°3\n");
+            }
+            else
+            {
+                printf("Caméra n°3 cachée!\n");
+            }
         }
     }
     else if (SDLK_F4 == event->key.keysym.sym)
@@ -619,6 +672,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°4\n");
+            }
+            else
+            {
+                printf("Caméra n°4 cachée!\n");
+            }
         }
     }
     else if (SDLK_F5 == event->key.keysym.sym)
@@ -631,6 +692,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°5\n");
+            }
+            else
+            {
+                printf("Caméra n°5 cachée!\n");
+            }
         }
     }
     else if (SDLK_F6 == event->key.keysym.sym)
@@ -643,6 +712,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°6\n");
+            }
+            else
+            {
+                printf("Caméra n°6 cachée!\n");
+            }
         }
     }
     else if (SDLK_F7 == event->key.keysym.sym)
@@ -655,6 +732,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°7\n");
+            }
+            else
+            {
+                printf("Caméra n°7 cachée!\n");
+            }
         }
     }
     else if (SDLK_F8 == event->key.keysym.sym)
@@ -667,6 +752,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°8\n");
+            }
+            else
+            {
+                printf("Caméra n°8 cachée!\n");
+            }
         }
     }
     else if (SDLK_F9 == event->key.keysym.sym)
@@ -679,6 +772,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°9\n");
+            }
+            else
+            {
+                printf("Caméra n°9 cachée!\n");
+            }
         }
     }
     else if (SDLK_F10 == event->key.keysym.sym)
@@ -691,6 +792,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°10\n");
+            }
+            else
+            {
+                printf("Caméra n°10 cachée!\n");
+            }
         }
     }
     else if (SDLK_F11 == event->key.keysym.sym)
@@ -703,6 +812,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°11\n");
+            }
+            else
+            {
+                printf("Caméra n°11 cachée!\n");
+            }
         }
     }
     else if (SDLK_F12 == event->key.keysym.sym)
@@ -715,6 +832,14 @@ keyboard_event(SDL_Event *event)
         else
         {
             cam->display = !(cam->display);
+            if (TRUE == cam->display)
+            {
+                printf("Affichage de la caméra n°12\n");
+            }
+            else
+            {
+                printf("Caméra n°12 cachée!\n");
+            }
         }
     }
 }
