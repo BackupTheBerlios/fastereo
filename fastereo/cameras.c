@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/05/03 14:15:15 $
- * Version:  $Revision: 1.9 $
- * ID:       $Id: cameras.c,v 1.9 2004/05/03 14:15:15 arutha Exp $
+ * Date:     $Date: 2004/05/05 19:26:05 $
+ * Version:  $Revision: 1.10 $
+ * ID:       $Id: cameras.c,v 1.10 2004/05/05 19:26:05 arutha Exp $
  * Comments:
  */
 /**
@@ -148,7 +148,7 @@ load_cameras(const char *file_name)
                 Dprintf((1,"image: %s\n", image));
                 Dprintf((1,"depth_map: %s\n", depth_map));
 
-                if ((ret < 3) || (id < 0) || (image[0] == '\0') 
+                if ((ret < 4) || (id < 0) || (image[0] == '\0') 
                     || (nb_labels > 255))
                 {
                     fprintf(stderr, "Commande non reconnue!! %s\n", buffer);

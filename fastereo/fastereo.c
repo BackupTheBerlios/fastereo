@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/05/03 14:15:15 $
- * Version:  $Revision: 1.13 $
- * ID:       $Id: fastereo.c,v 1.13 2004/05/03 14:15:15 arutha Exp $
+ * Date:     $Date: 2004/05/05 19:26:05 $
+ * Version:  $Revision: 1.14 $
+ * ID:       $Id: fastereo.c,v 1.14 2004/05/05 19:26:05 arutha Exp $
  * Comments:
  */
 /**
@@ -67,7 +67,7 @@ print_usage(void)
            "  A\t\t\tAnime la scène\n"
            "  S\t\t\tActive/Désactive les teintes\n"
            "  D\t\t\tAfficher ou non les cartes de profondeurs à la place des images\n"
-           "  M\t\t\tChanger de mode d'affichage: carrés ou triangles\n"
+           "  M\t\t\tChanger de mode d'affichage (points, carrés, triangles)\n"
            "  F1, F2, etc\t\tAfficher ou non les images 1, 2, etc.\n"
            );
     Rdbg(("print_usage"));
@@ -138,12 +138,12 @@ main(int argc, char *argv[])
     }
 
     /* on vérifie qu'il y a bien au moins 2 caméras chargées */
-    /* if (g_cameras.nb < 2)                                         */
-    /* {                                                             */
-    /*     fprintf(stderr, "Il faut charger au moins 2 caméras!\n"); */
-    /*     destroy_cameras();                                        */
-    /*     return EXIT_FAILURE;                                      */
-    /* }                                                             */
+    if (g_cameras.nb < 2)
+    {
+        fprintf(stderr, "Il faut charger au moins 2 caméras!\n");
+        destroy_cameras();
+        return EXIT_FAILURE;
+    }
 
     /* affichage */
     if (TRUE == display_opengl)

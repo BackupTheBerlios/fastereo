@@ -1,0 +1,24 @@
+MANUAL pour fastereo-0.1
+========================
+
+$ fastereo -h
+Usage: fastereo <file.commands>
+
+Options:
+  -h                Affiche cet écran
+  -g                Affichage OpenGL
+  -a <nb_keyframes> Nombre de keyframes dans l'animation en OpenGL (plus la 
+                    valeur est petite, plus le mouvement est rapide)
+  -z <zoom>         Zoom à appliquer aux images
+
+Touches au clavier:
+  ESC               Quitter l'application
+  Z                 Passer en plein écran ou revenir en mode fenêtré
+  A                 Anime la scène
+  S                 Active/Désactive les teintes
+  D                 Afficher ou non les cartes de profondeurs à la place des 
+                    images
+  M                 Changer de mode d'affichage (points, carrés, triangles)
+  F1, F2, etc       Afficher ou non les images 1, 2, etc.
+
+$Id: MANUAL,v 1.1 2004/05/05 19:26:05 arutha Exp $

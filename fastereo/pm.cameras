@@ -3,7 +3,9 @@
 
 # depth_maps nb_labels dmin dmax
 
-# camera id position image [depth_map]
+# camera id position image depth_map
+
+# shade id R G B
 
 depthmaps 25 0.0 12.0
 camera 1 0.0 pm/PM-2.pgm pm/PM-2_dm.pgm
