@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/14 05:39:33 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: commands.h,v 1.4 2004/04/14 05:39:33 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:29 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: commands.h,v 1.5 2004/04/19 18:59:29 arutha Exp $
  */
 /**
  * @file: commands.h
@@ -42,6 +42,8 @@ typedef enum
 
 int execute_commands(const char *file_name);
 int com_cameras(const char *command);
+int com_interpol(const char *command);
+int com_sequence(const char *command);
 
 // int simple_image(const stereo_mode_t mode,
 //                  const char *start_im,

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/16 17:31:22 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: cameras.h,v 1.5 2004/04/16 17:31:22 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:29 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: cameras.h,v 1.6 2004/04/19 18:59:29 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -29,14 +29,15 @@ typedef struct Camera_t
 {
 	int id;                  /**< identifiant de la caméra */
     float position;          /**< position de la caméra */
+    Color_t tint;            /**< teinte qu'on doit donner à l'image lors de 
+                               l'affichage OpenGL */
 	float m[4][4];           /**< matrice de la caméra */
 	float mi[4][4];          /**< matrice inverse */
-    // char img[MAX_LNAME];     /**< nom du fichier de l'image */
-    // char dm[MAX_LNAME];      /**< nom du fichier de la carte de profondeur */
-	imginfo ii;              /**< structure image */
-    imginfo labels;          /**< carte de profondeur */
+	imginfo ii;              /**< image associée à la caméra */
+    imginfo labels;          /**< carte de profondeurs */
     unsigned char nb_labels; /**< nombre d'étiquettes */
-    float range;             /**< étendue sur laquelle s'étale les étiquettes */
+    float dmin;              /**< profondeur minimale */
+    float dmax;              /**< profondeur maximale */
 	struct Camera_t *next;   /**< pointeur sur la prochaine caméra */
 	struct Camera_t *prev;   /**< pointeur sur la caméra précédente */
 } Camera_t;
@@ -60,11 +61,16 @@ Camera_t *add_camera(const int id,
                      const char *image, 
                      const char *depth_map,
                      const unsigned char nb_labels,
-                     const float range);
+                     const float dmin,
+                     const float dmax);
 int load_depth_map(Camera_t *cam, 
                    const char *file_name, 
                    unsigned char nb_labels);
+Camera_t *get_camera(int id);
 int img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol);
+Point2d_t proj(Camera_t *cam, Point3d_t ptw);
+Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth);
+float label2depth(Camera_t *pcam, int label);
 
 extern Cameras_t g_cameras;
 

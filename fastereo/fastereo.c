@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/16 17:31:23 $
- * Version:  $Revision: 1.9 $
- * ID:       $Id: fastereo.c,v 1.9 2004/04/16 17:31:23 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:29 $
+ * Version:  $Revision: 1.10 $
+ * ID:       $Id: fastereo.c,v 1.10 2004/04/19 18:59:29 arutha Exp $
  * Comments:
  */
 /**
@@ -56,9 +56,11 @@ print_usage(void)
     printf("usage: fastereo <file.commands>\n"
            "\n"
            "options:\n"
-           "  -h\t\taffiche cet écran\n"
-           "  -g\t\tdisplay in OpenGL\n"
-           "  -z <zoom>\tzoom à appliquer aux images\n");
+           "  -h\t\t\taffiche cet écran\n"
+           "  -g\t\t\tdisplay in OpenGL\n"
+           "  -a <nb_keyframes>\tnombre de keyframes dans l'animation en OpenGL"
+           " (plus la valeur est petite, plus l'animation est rapide)\n"
+           "  -z <zoom>\t\tzoom à appliquer aux images\n");
     Rdbg(("print_usage"));
 }
 
@@ -82,7 +84,7 @@ main(int argc,
 	static struct sigaction act;
 
     /* on récupère les options */
-    while ( (c = getopt(argc, argv, "hgz:")) >= 0) 
+    while ( (c = getopt(argc, argv, "hga:z:")) >= 0) 
     {
         switch (c) 
         {
@@ -98,6 +100,10 @@ main(int argc,
             case 'z':
                 /* display in OpenGL */
                 g_zoom = strtod(optarg, (char **)NULL);
+                break;
+            case 'a':
+                /* nombre de keyframes dans l'animation OpenGL */
+                g_anim_nb_keyframes = strtol(optarg, (char **)NULL, 10);;
                 break;
         }
     }

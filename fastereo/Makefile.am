@@ -3,6 +3,7 @@ fastereo_SOURCES = fastereo.c \
 		   commands.c \
 		   cameras.c \
 		   display.c \
+		   stereo.c \
 		   geom.c \
 		   utils.c \
 		   img.c

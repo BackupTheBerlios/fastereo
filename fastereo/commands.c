@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 05:21:22 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: commands.c,v 1.3 2004/04/15 05:21:22 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:29 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: commands.c,v 1.4 2004/04/19 18:59:29 arutha Exp $
  * Comments:
  */
 /**
@@ -13,9 +13,11 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "dbg.h"
 #include "utils.h"
 #include "commands.h"
+#include "stereo.h"
 
 /**
  * Exécute les commandes contenues dans le fichier file_name.
@@ -54,7 +56,7 @@ execute_commands(const char *file_name)
             printf("=== Commande: %s\n", buffer);
 
             /* commande 'cameras' */
-            if (strncmp(buffer, "cameras", 7) == 0)
+            if (strncmp(buffer, "cameras ", 8) == 0)
             {
                 if (com_cameras(buffer)) 
                 {
@@ -62,31 +64,22 @@ execute_commands(const char *file_name)
                     return RETURN_FAILED;
                 }
             }
-            /* |+ commande proj +|                                          */
-            /* else if(strncmp(buffer, "proj", 4) == 0)                     */
-            /* {                                                            */
-            /*     if(com_proj(buffer, &cameras)) return -1;                */
-            /* }                                                            */
-            /* |+ commande cout +|                                          */
-            /* else if(strncmp(buffer, "cout", 4) == 0)                     */
-            /* {                                                            */
-            /*     if(com_cout(buffer, &cameras)) return -1;                */
-            /* }                                                            */
-            /* |+ commande scan +|                                          */
-            /* else if(strncmp(buffer, "scan", 4) == 0)                     */
-            /* {                                                            */
-            /*     if(com_scan(buffer, &cameras)) return -1;                */
-            /* }                                                            */
-            /* |+ commande inter +|                                         */
-            /* else if(strncmp(buffer, "inter", 5) == 0)                    */
-            /* {                                                            */
-            /*     if(com_inter(buffer, &cameras)) return -1;               */
-            /* }                                                            */
-            /* |+ commande stereo +|                                        */
-            /* else if(strncmp(buffer, "stereo", 6) == 0)                   */
-            /* {                                                            */
-            /*     if(com_stereo(buffer, &cameras)) return -1;              */
-            /* }                                                            */
+            else if (strncmp(buffer, "interpol ", 9) == 0)
+            {
+                if (com_interpol(buffer))
+                {
+                    Rdbg(("execute_commands RETURN_FAILED"));
+                    return RETURN_FAILED;
+                }
+            }
+            else if (strncmp(buffer, "sequence ", 9) == 0)
+            {
+                if (com_sequence(buffer))
+                {
+                    Rdbg(("execute_commands RETURN_FAILED"));
+                    return RETURN_FAILED;
+                }
+            }
             else
             {
                 fprintf(stderr, "Commande non reconnue!! %s\n", buffer);
@@ -130,6 +123,70 @@ com_cameras(const char *command)
     /* printf("%d caméra chargées\n", g_cameras->nb); */
 
     Rdbg(("com_cameras RETURN_SUCCESS"));
+    return RETURN_SUCCESS;
+}
+
+/**
+ * Crée une image interpolée à partir des autres caméras
+ */
+int
+com_interpol(const char *command)
+{
+    Edbg(("com_interpol(command='%s')", command));
+
+    int ret;
+    char image_fn[MAX_LNAME];
+    char depth_map_fn[MAX_LNAME];
+    unsigned char *image = NULL;
+    unsigned char *depth_map = NULL;
+    int width;
+    int height;
+    float position = 0.0;
+
+    image_fn[0] = '\0';
+    depth_map_fn[0] = '\0';
+    
+    ret = sscanf(command, "interpol %f %s %s",
+                 &position, image_fn, depth_map_fn);
+
+    if (ret < 2)
+    {
+        fprintf(stderr, "Commande non reconnue!! %s\n", command);
+        Rdbg(("com_interpol RETURN_FAILED"));
+        return RETURN_FAILED;
+    }
+
+    width = g_cameras.root->ii.XSize;
+    height = g_cameras.root->ii.YSize;
+    image = (unsigned char *) malloc(sizeof(unsigned char)*width*height);
+    if ('\0' != depth_map[0])
+    {
+        depth_map = (unsigned char *) malloc(sizeof(unsigned char)*width*height);
+    }
+
+    if (RETURN_FAILED == interpol(position, image, depth_map))
+    {
+        fprintf(stderr, "L'interpolation a échouée!!\n");
+        Rdbg(("com_interpol RETURN_FAILED"));
+        return RETURN_FAILED;
+    }
+
+    free(image);
+    if(depth_map) free(depth_map);
+
+    Rdbg(("com_interpol RETURN_SUCCESS"));
+    return RETURN_SUCCESS;
+}
+
+/**
+ * Crée une séquence d'images interpolées à partir des autres caméras
+ */
+int
+com_sequence(const char *command)
+{
+    Edbg(("com_sequence(command='%s')", command));
+
+    Rdbg(("com_sequence RETURN_SUCCESS"));
     return RETURN_SUCCESS;
 }
 

@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/16 17:31:23 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: geom.c,v 1.3 2004/04/16 17:31:23 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:30 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: geom.c,v 1.4 2004/04/19 18:59:30 arutha Exp $
  * Comments:
  */
 /**
@@ -137,21 +137,39 @@ normalize3d(Vector3d_t *v)
 }
 
 /**
- * Déprojette un point 3D dans la scène
+ * h_p2d
  */
-void
-deproj_point(Point3d_t *point, Point3d_t *eye, float step_z, float label)
+void h_p2d(Point2d_t *p)
 {
-    Vector3d_t vdir;
+	p->x = p->x / p->w;
+	p->y = p->y / p->w;
+	p->w = 1.0;
+}
 
-    vdir.x = point->x - eye->x;
-    vdir.y = point->y - eye->y;
-    vdir.z = point->z - eye->z;
-    normalize3d(&vdir);
+/**
+ * h_p3d
+ */
+void h_p3d(Point3d_t *p)
+{
+	p->x = p->x / p->w;
+	p->y = p->y / p->w;
+	p->z = p->z / p->w;
+	p->w = 1.0;
+}
 
-    point->x += label * step_z * vdir.x;
-    point->y += label * step_z * vdir.y;
-    point->z += label * step_z * vdir.z;
+/**
+ * m3d_dot_p3d
+ */
+Point3d_t m3d_dot_p3d(float m[4][4], Point3d_t p)
+{
+	Point3d_t res;
+
+	res.x = m[0][0]*p.x + m[0][1]*p.y + m[0][2]*p.z + m[0][3]*p.w;
+	res.y = m[1][0]*p.x + m[1][1]*p.y + m[1][2]*p.z + m[1][3]*p.w;
+	res.z = m[2][0]*p.x + m[2][1]*p.y + m[2][2]*p.z + m[2][3]*p.w;
+	res.w = m[3][0]*p.x + m[3][1]*p.y + m[3][2]*p.z + m[3][3]*p.w;
+
+	return res;
 }
 
 /* use 4 spaces as a tab please */

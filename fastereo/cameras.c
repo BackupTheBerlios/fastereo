@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/16 17:31:22 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: cameras.c,v 1.5 2004/04/16 17:31:22 arutha Exp $
+ * Date:     $Date: 2004/04/19 18:59:29 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: cameras.c,v 1.6 2004/04/19 18:59:29 arutha Exp $
  * Comments:
  */
 /**
@@ -19,9 +19,12 @@
 #include "cameras.h"
 #include "geom.h"
 #include "img.h"
+#include "display.h"
 
 /** variable globale représentant toutes les caméras chargées */
 Cameras_t g_cameras;
+
+extern char g_enable_tint;
 
 /**
  * Initialise l'objet qui représente les caméras.
@@ -97,11 +100,13 @@ load_cameras(const char *file_name)
     char image[MAX_LNAME];
     char depth_map[MAX_LNAME];
     int nb_labels;
-    float range;
+    Color_t tint;
+    float dmin, dmax, dtmp;
 
     /* initialisation */
     g_cameras.root = NULL;
     g_cameras.nb = 0;
+    tint[3] = 1.0;
 
     /* ouverture du fichier */
     fd = fopen(file_name, "r");
@@ -125,15 +130,21 @@ load_cameras(const char *file_name)
             if (strncmp(buffer, "camera ", 7) == 0)
             {
                 id = -1;
-                position = 9e90; /* position ne peut pas être trop grand */
                 image[0] = '\0';
                 depth_map[0] = '\0';
                 nb_labels = 0;
 
                 /* on extrait les données */
-                ret = sscanf(buffer, "camera %d %f %s %s %d %f",
-                             &id, &position, image, depth_map, &nb_labels, 
-                             &range);
+                ret = sscanf(buffer, "camera %d %f %s %s %d %f %f",
+                             &id, &position, image, depth_map, &nb_labels,
+                             &dmin, &dmax);
+
+                if ((ret == 7) && (dmin > dmax))
+                {
+                    dtmp = dmin;
+                    dmin = dmax;
+                    dmax = dtmp;
+                }
 
                 Dprintf((1,"Données extraites:\n"));
                 Dprintf((1,"id: %d\n", id));
@@ -141,9 +152,11 @@ load_cameras(const char *file_name)
                 Dprintf((1,"image: %s\n", image));
                 Dprintf((1,"depth_map: %s\n", depth_map));
                 Dprintf((1,"nb_labels: %d\n", nb_labels));
-                Dprintf((1,"range: %.3f\n", range));
-                if ((ret < 3) || (id < 0) || (position > 8e90) 
-                    || (image[0] == '\0') || (nb_labels > 255))
+                Dprintf((1,"dmin: %.3f\n", dmin));
+                Dprintf((1,"dmax: %.3f\n", dmax));
+
+                if ((ret < 5) || (id < 0) || (image[0] == '\0') 
+                    || (nb_labels > 255))
                 {
                     fprintf(stderr, "Commande non reconnue!! %s\n", buffer);
                 }
@@ -153,11 +166,11 @@ load_cameras(const char *file_name)
                     if(ret > 3)
                     {
                         cam = add_camera(id, position, image, depth_map,
-                                         (unsigned char)nb_labels, range);
+                                         (unsigned char)nb_labels, dmin, dmax);
                     }
                     else
                     {
-                        cam = add_camera(id, position, image, NULL, 0, 0.0);
+                        cam = add_camera(id, position, image, NULL, 0, 0, 0);
                     }
 
                     /* erreur? */
@@ -171,6 +184,44 @@ load_cameras(const char *file_name)
                         return RETURN_FAILED;
                     }
                     Dprintf((1,"Caméra ajoutée!\n"));
+                }
+            }
+            /* commande 'tint' */
+            else if (strncmp(buffer, "tint ", 5) == 0)
+            {
+                /* on extrait les données */
+                ret = sscanf(buffer, "tint %d %f %f %f",
+                             &id, &(tint[0]), &(tint[1]), &(tint[2]));
+
+                if (ret < 4)
+                {
+                    fprintf(stderr, "Commande non reconnue!! %s\n", buffer);
+                }
+                else
+                {
+                    Dprintf((1,"Données extraites:\n"));
+                    Dprintf((1,"id: %d\n", id));
+                    Dprintf((1,"R: %.3f\n", tint[0]));
+                    Dprintf((1,"G: %.3f\n", tint[1]));
+                    Dprintf((1,"B: %.3f\n", tint[2]));
+
+                    cam = get_camera (id);
+
+                    /* si la caméra n'a pas été trouvée */
+                    if (NULL == cam)
+                    {
+                        fprintf(stderr, "Impossible de trouver la caméra n°%d!!\n",
+                                id);
+                    }
+                    else
+                    {
+                        cam->tint[0] = tint[0];
+                        cam->tint[1] = tint[1];
+                        cam->tint[2] = tint[2];
+                        cam->tint[3] = 1.0;
+
+                        /* g_enable_tint = TRUE; */
+                    }
                 }
             }
             else
@@ -190,12 +241,12 @@ load_cameras(const char *file_name)
 /**
  * Ajoute une caméra dans la liste
  * @param id identifiant de la caméra
- * @param position position de la caméra
  * @param image nom du fichier de l'image associée
  * @param depth_map nom du fichier de la carte de profondeurs associée 
  *                  [NULL si on n'en a pas]
  * @param nb_labels nombre d'étiquettes présentes dans la carte de profondeurs
- * @param range intervalle sur lequel s'étale les étiquettes
+ * @param dmin profondeur minimale
+ * @param dmax profondeur maximale
  * @return un pointeur sur la nouvelle caméra
  */
 Camera_t *
@@ -204,11 +255,12 @@ add_camera(const int id,
            const char *image, 
            const char *depth_map,
            const unsigned char nb_labels,
-           const float range)
+           const float dmin,
+           const float dmax)
 {
-    Edbg(("add_camera(id=%d, position=%.3f, image='%s', depth_map='%s', "
-          "nb_labels=%d, range=%.3f)", 
-          id, position, image, depth_map, nb_labels, range));
+    Edbg(("add_camera(id=%d, position=%.3f, image='%s', depth_map='%s',"
+          " nb_labels=%d, dmin=%.3f, dmax=%.3f)", 
+          id, position, image, depth_map, nb_labels, dmin, dmax));
 
     Camera_t *cam;
     Camera_t *prev = NULL;
@@ -250,7 +302,6 @@ add_camera(const int id,
         Rdbg(("add_camera NULL"));
         return NULL;
     }
-    SaveImage("hh.pgm", &(cam->ii));
 
     /* on charge la carte de profondeurs si elle existe */
     if (NULL != depth_map)
@@ -273,30 +324,26 @@ add_camera(const int id,
             Rdbg(("add_camera NULL"));
             return NULL;
         }
-        cam->range = range;
     }
     else
     {
         cam->labels.Data = NULL;
         cam->nb_labels = 0;
-        cam->range = 0.0;
     }
 
-    /* strncpy(cam->img, image, MAX_LNAME);        */
-    /* if (NULL != depth_map)                      */
-    /* {                                           */
-    /*     strncpy(cam->dm, depth_map, MAX_LNAME); */
-    /* }                                           */
-    /* else                                        */
-    /* {                                           */
-    /*     cam->dm[0] = '\0';                      */
-    /* }                                           */
-    cam->position = position;
     cam->next = NULL;
     cam->prev = prev;
     load_identity(cam->m);
     cam->m[0][3] = position;
     inv_matrix4(cam->m, cam->mi);
+    cam->dmin = dmin;
+    cam->dmax = dmax;
+
+    /* on met la teinte à blanc par défaut */
+    cam->tint[0] = 1.0;
+    cam->tint[1] = 1.0;
+    cam->tint[2] = 1.0;
+    cam->tint[3] = 1.0;
 
     /* on augmente le nombre de caméras */
     g_cameras.nb++;
@@ -347,6 +394,28 @@ load_depth_map(Camera_t *cam, const char *file_name, unsigned char nb_labels)
 }
 
 /**
+ * Renvoie la caméra dont l'identifiant est id
+ * @param id identifiant de la caméra
+ * @return pointeur sur la caméra, NULL si non trouvée
+ */
+Camera_t *
+get_camera(int id)
+{
+    Camera_t *pcam = g_cameras.root;
+
+    while (NULL != pcam)
+    {
+        if (id == pcam->id)
+        {
+            return pcam;
+        }
+        pcam = pcam->next;
+    }
+
+    return pcam;
+}
+
+/**
  * Donne la couleur d'un pixel dans l'image
  */
 int
@@ -382,12 +451,74 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol)
     moy /= nb_colors;
 
     /* on remplit les autres cases avec la première composante */
-    for (;k<4; k++)
+    for (;k<3; k++)
     {
         (*color)[k] = moy;
     }
+    if(nb_colors < 4) (*color)[k] = 1.0;
 
     return RETURN_SUCCESS;
+}
+
+/**
+ * proj
+ */
+Point2d_t proj(Camera_t *cam, Point3d_t ptw)
+{
+    Edbg(("proj(cam=%p, ptw=(%.3f,%.3f,%.3f,%.3f))", 
+          cam, ptw.x, ptw.y, ptw.z, ptw.w));
+    Point2d_t res;
+    Point3d_t ptmp;
+
+    ptmp = m3d_dot_p3d(cam->m, ptw);
+    res.x = ptmp.x / ptmp.z;
+    res.y = ptmp.y / ptmp.z;
+    res.w = 1.0;
+
+    Rdbg(("proj res=(%.3f,%.3f,%.3f)", res.x, res.y, res.w));
+    return res;
+}
+
+/**
+ * deproj
+ */
+Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth)
+{
+    Edbg(("deproj(cam=%p, pti=(%.3f,%.3f,%.3f), depth=%.3f)", 
+          cam, pti.x, pti.y, pti.w, depth));
+
+    Point3d_t res;
+    Point3d_t ptmp;
+
+    ptmp.x = pti.x / pti.w;
+    ptmp.y = pti.y / pti.w;
+    ptmp.z = 1.0;
+    ptmp.w = depth;
+
+    res = m3d_dot_p3d(cam->mi, ptmp);
+
+    h_p3d(&res);
+
+    Rdbg(("deproj res=(%.3f,%.3f,%.3f,%.3f)", res.x, res.y, res.z, res.w));
+    return res;
+}
+
+/**
+ * Donne la profondeur qui correspond à une étiquette.
+ */
+float label2depth(Camera_t *pcam, int label)
+{
+    Edbg(("label2depth(pcam=%p, label=%d)", pcam, label));
+
+    Dprintf((1,"nb_labels: %d\n", pcam->nb_labels));
+    Dprintf((1,"dmax: %f\n", pcam->dmax));
+    Dprintf((1,"dmin: %f\n", pcam->dmin));
+
+    float depth = (float)(pcam->nb_labels-1-label)/(float)(pcam->nb_labels-1)
+        * (pcam->dmax - pcam->dmin) + pcam->dmin;
+
+    Rdbg(("label2depth depth=%f", depth));
+    return depth;
 }
 
 /* use 4 spaces as a tab please */

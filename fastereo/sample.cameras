@@ -1,7 +1,16 @@
 # camera id position image [depth_map nb_labels range]
 
-camera 1 0.0 tsukuba/col3.ppm tsukuba/col3_dm.pgm 31 10.0
-# camera 1 0.0 pm/PM-2.pgm pm/PM-2_dm.pgm 25 10.0
-# camera 1 0.0 plouf.pgm
-# camera 1 0.0 white.pgm
-# camera 2 1.0 pm/PM-2.pgm pm/PM-2_dm.pgm 25 10.0
+camera 1 0.0 pm/PM-2.pgm pm/PM-2_dm.pgm 25 0.0 12.0
+camera 2 -1.0 pm/PM-14.pgm pm/PM-14_dm.pgm 25 0.0 12.0
+
+# tint 1 1.0 0.5 0.5
+# tint 2 0.5 1.0 0.5
+
+# camera 1 0.5 tsukuba/scene1.row3.col1.ppm tsukuba/scene1.row3.col1_dm.pgm 31 0 60
+# camera 2 0.25 tsukuba/scene1.row3.col2.ppm tsukuba/scene1.row3.col2_dm.pgm 31 0 60
+# camera 3 0.0 tsukuba/scene1.row3.col3.ppm tsukuba/scene1.row3.col3_dm.pgm 31 0 60
+# camera 4 -0.25 tsukuba/scene1.row3.col4.ppm tsukuba/scene1.row3.col4_dm.pgm 31 0 60
+# camera 5 -0.5 tsukuba/scene1.row3.col5.ppm tsukuba/scene1.row3.col5_dm.pgm 31 0 60
+
+# tint 1 1.0 0.1 0.1
+# tint 2 0.1 1.0 0.1
