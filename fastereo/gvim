@@ -1,0 +1,10 @@
+#!/bin/bash
+
+FILES=""
+FILES="${FILES} `find -name "*.c"`"
+FILES="${FILES} `find -name "*.h"`"
+FILES="${FILES} Makefile.am configure.in"
+
+./ctags
+gvim -c "silent! source session" -c "autocmd VimLeavePre * mksession! session" -c "noh" $FILES
+#gvim rapport/rapport.tex
