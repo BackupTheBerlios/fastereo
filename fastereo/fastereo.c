@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/14 05:39:33 $
- * Version:  $Revision: 1.6 $
- * ID:       $Id: fastereo.c,v 1.6 2004/04/14 05:39:33 arutha Exp $
+ * Date:     $Date: 2004/04/15 05:21:22 $
+ * Version:  $Revision: 1.7 $
+ * ID:       $Id: fastereo.c,v 1.7 2004/04/15 05:21:22 arutha Exp $
  * Comments:
  */
 /**
@@ -18,7 +18,20 @@
 #include "utils.h"
 #include "fastereo.h"
 #include "commands.h"
+#include "display.h"
 
+/**
+ * Appelée lors de la fermeture du programme.
+ * S'occupe du nettoyage...
+ */
+void terminate_program(void)
+{
+    Edbg(("terminate_program()"));
+
+    destroy_cameras();
+    
+    Rdbg(("terminate_program"));
+}
 
 /**
  * Prints usage
@@ -49,8 +62,7 @@ main(int argc,
     Initdbg((&argc, argv));
 
     int c;
-    Stereo_mode_t mode = INTENSITIES;
-    Action_t action = SIMPLE;
+    char display_opengl = FALSE;
     int ret;
 
     /* on récupère les options */
@@ -65,8 +77,7 @@ main(int argc,
                 return EXIT_SUCCESS;
             case 'z':
                 /* display in OpenGL */
-                action = OPENGL;
-                mode = DEPTH_MAPS;
+                display_opengl = TRUE;
                 break;
         }
     }
@@ -85,6 +96,18 @@ main(int argc,
     {
         destroy_cameras();
         return EXIT_FAILURE;
+    }
+
+    /* affichage */
+    if (TRUE == display_opengl)
+    {
+        /* on utilise atexit car glut ne dit pas quand il quitte le programme
+         * (ce gros malin...) 
+         * cf 3.070 http://users.frii.com/martz/oglfaq/glut.htm */
+        atexit(terminate_program);
+
+        init_display(&argc, argv);
+        start_display();
     }
 
     /* nettoyage */

@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 23:59:49 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: geom.h,v 1.3 2004/04/13 23:59:49 arutha Exp $
+ * Date:     $Date: 2004/04/15 05:21:22 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: geom.h,v 1.4 2004/04/15 05:21:22 arutha Exp $
  * Comments:
  */
 /**
@@ -31,6 +31,25 @@ typedef struct {
     float y; /**< coordonnée en Y */
     float z; /**< coordonnée en Z */
 } Vector3d_t;
+
+/**
+ * @brief Un point en 2 dimensions
+ */
+typedef struct {
+    float x; /**< coordonnée en X */
+    float y; /**< coordonnée en Y */
+    float w; /**< coordonnée homogène */
+} Point2d_t;
+
+/**
+ * @brief Un point en 3 dimensions
+ */
+typedef struct {
+    float x; /**< coordonnée en X */
+    float y; /**< coordonnée en Y */
+    float z; /**< coordonnée en Z */
+    float w; /**< coordonnée homogène */
+} Point3d_t;
 
 void load_identity(float m[4][4]);
 int inv_matrix4(float min[4][4], float mout[4][4]);

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/14 05:39:33 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: cameras.c,v 1.2 2004/04/14 05:39:33 arutha Exp $
+ * Date:     $Date: 2004/04/15 05:21:22 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: cameras.c,v 1.3 2004/04/15 05:21:22 arutha Exp $
  * Comments:
  */
 /**
@@ -13,6 +13,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "dbg.h"
 #include "utils.h"
 #include "cameras.h"
@@ -99,6 +100,7 @@ load_cameras(const char *file_name)
     char image[MAX_LNAME];
     char depth_map[MAX_LNAME];
     int nb_labels;
+    float range;
 
     /* initialisation */
     g_cameras.root = NULL;
@@ -132,8 +134,9 @@ load_cameras(const char *file_name)
                 nb_labels = 0;
 
                 /* on extrait les données */
-                ret = sscanf(buffer, "camera %d %f %s %s %d",
-                             &id, &position, image, depth_map, &nb_labels);
+                ret = sscanf(buffer, "camera %d %f %s %s %d %f",
+                             &id, &position, image, depth_map, &nb_labels, 
+                             &range);
 
                 Dprintf((1,"Données extraites:\n"));
                 Dprintf((1,"id: %d\n", id));
@@ -141,6 +144,7 @@ load_cameras(const char *file_name)
                 Dprintf((1,"image: %s\n", image));
                 Dprintf((1,"depth_map: %s\n", depth_map));
                 Dprintf((1,"nb_labels: %d\n", nb_labels));
+                Dprintf((1,"range: %.3f\n", range));
                 if ((ret < 3) || (id < 0) || (position > 8e90) 
                     || (image[0] == '\0') || (nb_labels > 255))
                 {
@@ -152,11 +156,11 @@ load_cameras(const char *file_name)
                     if(ret > 3)
                     {
                         cam = add_camera(id, position, image, depth_map,
-                                         (unsigned char)nb_labels);
+                                         (unsigned char)nb_labels, range);
                     }
                     else
                     {
-                        cam = add_camera(id, position, image, NULL, 0);
+                        cam = add_camera(id, position, image, NULL, 0, 0.0);
                     }
 
                     /* erreur? */
@@ -194,6 +198,7 @@ load_cameras(const char *file_name)
  * @param depth_map nom du fichier de la carte de profondeurs associée 
  *                  [NULL si on n'en a pas]
  * @param nb_labels nombre d'étiquettes présentes dans la carte de profondeurs
+ * @param range intervalle sur lequel s'étale les étiquettes
  * @return un pointeur sur la nouvelle caméra
  */
 Camera_t *
@@ -201,11 +206,12 @@ add_camera(const int id,
            const float position, 
            const char *image, 
            const char *depth_map,
-           const unsigned char nb_labels)
+           const unsigned char nb_labels,
+           const float range)
 {
     Edbg(("add_camera(id=%d, position=%.3f, image='%s', depth_map='%s', "
-          "nb_labels=%d)", 
-          id, position, image, depth_map, nb_labels));
+          "nb_labels=%d, range=%.3f)", 
+          id, position, image, depth_map, nb_labels, range));
 
     Camera_t *cam;
     Camera_t *prev = NULL;
@@ -269,11 +275,13 @@ add_camera(const int id,
             Rdbg(("add_camera NULL"));
             return NULL;
         }
+        cam->range = range;
     }
     else
     {
         cam->labels = NULL;
         cam->nb_labels = 0;
+        cam->range = 0.0;
     }
 
     /* strncpy(cam->img, image, MAX_LNAME);        */

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/14 05:39:33 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: cameras.h,v 1.2 2004/04/14 05:39:33 arutha Exp $
+ * Date:     $Date: 2004/04/15 05:21:22 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: cameras.h,v 1.3 2004/04/15 05:21:22 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -16,9 +16,7 @@
 
 #include "img.h"
 
-/** 
- * La taille maximale que peut avoir une ligne dans un fichier *.cameras
- */
+/** La taille maximale que peut avoir une ligne dans un fichier *.cameras */
 #define MAX_LLINE_CAMERAS 1024
 /** La taille maximale que peut avoir un chemin vers un fichier */
 #define MAX_LNAME 1024
@@ -36,6 +34,7 @@ typedef struct Camera_t
 	imginfo ii;              /**< structure image */
     unsigned char *labels;   /**< carte de profondeur */
     unsigned char nb_labels; /**< nombre d'étiquettes */
+    float range;             /**< étendue sur laquelle s'étale les étiquettes */
 	struct Camera_t *next;   /**< pointeur sur la prochaine caméra */
 	struct Camera_t *prev;   /**< pointeur sur la caméra précédente */
 } Camera_t;
@@ -46,7 +45,7 @@ typedef struct Camera_t
 typedef struct Cameras_t 
 {
 	int nb;         /**< nombre de caméras */
-	Camera_t *root; /**< première caméra de la file */
+	Camera_t *root; /**< pointeur sur la première caméra de la file */
 	Camera_t *last; /**< pointeur sur la dernière caméra de la file */
 } Cameras_t;
 
@@ -58,7 +57,8 @@ Camera_t *add_camera(const int id,
                      const float position, 
                      const char *image, 
                      const char *depth_map,
-                     const unsigned char nb_labels);
+                     const unsigned char nb_labels,
+                     const float range);
 int load_depth_map(Camera_t *cam, 
                    const char *file_name, 
                    unsigned char nb_labels);
