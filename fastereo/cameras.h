@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: cameras.h,v 1.4 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:22 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: cameras.h,v 1.5 2004/04/16 17:31:22 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -15,6 +15,7 @@
 #define _CAMERAS_H_
 
 #include "img.h"
+#include "geom.h"
 
 /** La taille maximale que peut avoir une ligne dans un fichier *.cameras */
 #define MAX_LLINE_CAMERAS 1024
@@ -63,6 +64,7 @@ Camera_t *add_camera(const int id,
 int load_depth_map(Camera_t *cam, 
                    const char *file_name, 
                    unsigned char nb_labels);
+int img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol);
 
 extern Cameras_t g_cameras;
 

@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: display.c,v 1.2 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:22 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: display.c,v 1.3 2004/04/16 17:31:22 arutha Exp $
  * Comments:
  */
 /**
@@ -21,7 +21,7 @@
 #include "cameras.h"
 
 /** Variable globale représentant la position de la caméra */
-Point3d_t g_cam_pos = CAM_POS;
+Point3d_t g_eye_pos = EYE_POS;
 /** Variable globale représentant le point de référence */
 Point3d_t g_ref_point = REF_POINT;
 /** Variable globale représentant le vecteur UP de la caméra */
@@ -38,7 +38,7 @@ float g_zoomim = ZOOM;
 GLuint g_scene;
 
 /** booléen qui indique quand il faut sortir de la boucle SDL */
-char g_done = 0;
+char g_done = FALSE;
 /** objet représentant la fenêtre SDL */
 SDL_Surface *g_screen = NULL;
 
@@ -52,7 +52,7 @@ GLfloat g_zoom = 0.0;
 GLfloat g_translate_z = 0.0;
 
 /** Variable indiquant si on est en plein écran */
-char g_fullscreen = 0;
+char g_fullscreen = FALSE;
 
 /**
  * Initialise l'affichage
@@ -171,8 +171,8 @@ init_gl(void)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_SMOOTH);
 
-    Dprintf((1,"g_cam_pos (%.3f, %.3f, %.3f)\n", 
-             g_cam_pos.x, g_cam_pos.y, g_cam_pos.z));
+    Dprintf((1,"g_eye_pos (%.3f, %.3f, %.3f)\n", 
+             g_eye_pos.x, g_eye_pos.y, g_eye_pos.z));
     Dprintf((1,"g_ref_point (%.3f, %.3f, %.3f)\n", 
              g_ref_point.x, g_ref_point.y, g_ref_point.z));
     Dprintf((1,"g_cam_up (%.3f, %.3f, %.3f)\n", 
@@ -183,7 +183,7 @@ init_gl(void)
     glLoadIdentity();
     gluPerspective(CAM_THETA, (float)g_width/(float)g_height,
                    NEAR_PLANE, FAR_PLANE);
-    gluLookAt(g_cam_pos.x, g_cam_pos.y, g_cam_pos.z,
+    gluLookAt(g_eye_pos.x, g_eye_pos.y, g_eye_pos.z,
               g_ref_point.x, g_ref_point.y, g_ref_point.z,
               g_cam_up.x, g_cam_up.y, g_cam_up.z);
 
@@ -204,27 +204,15 @@ construct_scene(void)
 {
     Edbg(("construct_scene()"));
 
-    float hs = 1.0;
-    float ws = (float)g_width / (float)g_height;
-    float step_x = ws / (g_width/g_zoomim-1);
-    float step_y = hs / (g_height/g_zoomim-1);
-    float step_z;
+    float hscreen = 1.0;
+    float wscreen = (float)g_width / (float)g_height;
+    float step_x = wscreen / (g_width/g_zoomim-1);
+    float step_y = hscreen / (g_height/g_zoomim-1);
     Camera_t *pcam = g_cameras.root;
-    Point3d_t point;
-    int i, j;
-    int width;
-    int height;
-    Point3d_t p1, p2, p3, p4, p5;
-    float color_p1, color_p2, color_p3, color_p4, color_p5;
-    int nb_colors;
-    Vector3d_t vdir;
-    float label;
 
     Dprintf((1,"step_x: %.6f\n", step_x));
     Dprintf((1,"step_y: %.6f\n", step_y));
-    Dprintf((1,"hs: %.6f\tws: %.6f\n", hs, ws));
-
-    point.z = 0;
+    Dprintf((1,"hscreen: %.6f\twscreen: %.6f\n", hscreen, wscreen));
 
     g_scene = glGenLists(1);
     glLoadIdentity();
@@ -232,161 +220,14 @@ construct_scene(void)
     glNewList(g_scene, GL_COMPILE);
     {
         glBegin(GL_TRIANGLES);
+        
+        /* on parcourt toutes les caméras */
         while (NULL != pcam)
         {
-            point.y = -hs/2;
-            width = pcam->ii.XSize;
-            height = pcam->ii.YSize;
-            nb_colors = pcam->ii.ZSize;
-            step_z = pcam->range / pcam->nb_labels;
-            Dprintf((1,"caméra n°%d\n", pcam->id));
-            Dprintf((1,"width: %d\n", width));
-            Dprintf((1,"height: %d\n", height));
-            Dprintf((1,"step_z: %.3f\n", step_z));
+            /* on affiche l'image associée à la caméra courante */
+            display_cam(pcam, hscreen, wscreen, step_x, step_y);
 
-            /* on se déplace sur les y */
-            for (i=0; i<height-1; i++)
-            {
-                /* on va au début de la ligne suivante */
-                point.x = pcam->position - ws/2;
-
-                /* on se déplace sur les x */
-                for (j=0; j<width-1; j++)
-                {
-                    /* Dprintf((1,"i: %d\tj: %d\n", i, j));     */
-                    /* Dprintf((1,"point (%.3f, %.3f, %.3f)\n", */
-                    /*          point.x, point.y, point.z));    */
-
-                    /* on calcule les points */
-                    p1 = point;
-                    p2 = point; p2.x += step_x;
-                    p3 = point; p3.y += step_y;
-                    p4 = point; p4.x += step_x; p4.y += step_y;
-                    p5 = point; p5.x += step_x/2; p5.y += step_y/2;
-
-                    /* on place les points à la distance correspondant à leur
-                     * étiquette */
-                    /* point 1 */
-                    vdir.x = p1.x;
-                    vdir.y = p1.y;
-                    vdir.z = p1.z - NEAR_PLANE;
-                    normalize3d(&vdir);
-                    label = pcam->labels.Data[i*width+j];
-                    /* Dprintf((1,"p1 label = %.3f\n", label)); */
-                    p1.x += label * step_z * vdir.x;
-                    p1.y += label * step_z * vdir.y;
-                    p1.z += label * step_z * vdir.z;
-                    /* point 2 */
-                    vdir.x = p2.x;
-                    vdir.y = p2.y;
-                    vdir.z = p2.z - NEAR_PLANE;
-                    normalize3d(&vdir);
-                    label = pcam->labels.Data[i*width+(j+1)];
-                    /* Dprintf((1,"p2 label = %.3f\n", label)); */
-                    p2.x += label * step_z * vdir.x;
-                    p2.y += label * step_z * vdir.y;
-                    p2.z += label * step_z * vdir.z;
-                    /* point 3 */
-                    vdir.x = p3.x;
-                    vdir.y = p3.y;
-                    vdir.z = p3.z - NEAR_PLANE;
-                    normalize3d(&vdir);
-                    label = pcam->labels.Data[(i+1)*width+j];
-                    /* Dprintf((1,"p3 label = %.3f\n", label)); */
-                    p3.x += label * step_z * vdir.x;
-                    p3.y += label * step_z * vdir.y;
-                    p3.z += label * step_z * vdir.z;
-                    /* point 4 */
-                    vdir.x = p4.x;
-                    vdir.y = p4.y;
-                    vdir.z = p4.z - NEAR_PLANE;
-                    normalize3d(&vdir);
-                    label = pcam->labels.Data[(i+1)*width+(j+1)];
-                    /* Dprintf((1,"p4 label = %.3f\n", label)); */
-                    p4.x += label * step_z * vdir.x;
-                    p4.y += label * step_z * vdir.y;
-                    p4.z += label * step_z * vdir.z;
-                    /* point 5 */
-                    vdir.x = p5.x;
-                    vdir.y = p5.y;
-                    vdir.z = p5.z - NEAR_PLANE;
-                    normalize3d(&vdir);
-                    label = InterpoleImg(j+0.5, i+0.5, 0, &(pcam->labels));
-                    /* Dprintf((1,"p5 label = %.3f\n", label)); */
-                    p5.x += label * step_z * vdir.x;
-                    p5.y += label * step_z * vdir.y;
-                    p5.z += label * step_z * vdir.z;
-
-                    /* on récupère les couleurs des points */
-                    color_p1 = pcam->ii.Data[(i*width+j)*nb_colors];
-                    color_p2 = pcam->ii.Data[(i*width+(j+1))*nb_colors];
-                    color_p3 = pcam->ii.Data[((i+1)*width+j)*nb_colors];
-                    color_p4 = pcam->ii.Data[((i+1)*width+(j+1))*nb_colors];
-                    color_p5 = InterpoleImg(j+0.5, i+0.5, 0, &(pcam->ii));
-                    color_p1 /= 255.0;
-                    color_p2 /= 255.0;
-                    color_p3 /= 255.0;
-                    color_p4 /= 255.0;
-                    color_p5 /= 255.0;
-
-                    /* Dprintf((1,"p1 (%.6f, %.6f, %.6f)\n", p1.x, p1.y, p1.z)); */
-                    /* Dprintf((1,"color_p1: %.1f\n", color_p1));                */
-                    /* Dprintf((1,"p2 (%.6f, %.6f, %.6f)\n", p2.x, p2.y, p2.z)); */
-                    /* Dprintf((1,"color_p2: %.1f\n", color_p2));                */
-                    /* Dprintf((1,"p3 (%.6f, %.6f, %.6f)\n", p3.x, p3.y, p3.z)); */
-                    /* Dprintf((1,"color_p3: %.1f\n", color_p3));                */
-                    /* Dprintf((1,"p4 (%.6f, %.6f, %.6f)\n", p4.x, p4.y, p4.z)); */
-                    /* Dprintf((1,"color_p4: %.1f\n", color_p4));                */
-                    /* Dprintf((1,"p5 (%.6f, %.6f, %.6f)\n", p5.x, p5.y, p5.z)); */
-                    /* Dprintf((1,"color_p5: %.1f\n", color_p5));                */
-
-                    glColor3f(color_p5, color_p5, color_p5);
-                    glVertex3f(p5.x, p5.y, p5.z);
-                    glColor3f(color_p1, color_p1, color_p1);
-                    glVertex3f(p1.x, p1.y, p1.z);
-                    glColor3f(color_p2, color_p2, color_p2);
-                    glVertex3f(p2.x, p2.y, p2.z);
-
-                    glColor3f(color_p5, color_p5, color_p5);
-                    glVertex3f(p5.x, p5.y, p5.z);
-                    glColor3f(color_p2, color_p2, color_p2);
-                    glVertex3f(p2.x, p2.y, p2.z);
-                    glColor3f(color_p4, color_p4, color_p4);
-                    glVertex3f(p4.x, p4.y, p4.z);
-
-                    glColor3f(color_p5, color_p5, color_p5);
-                    glVertex3f(p5.x, p5.y, p5.z);
-                    glColor3f(color_p4, color_p4, color_p4);
-                    glVertex3f(p4.x, p4.y, p4.z);
-                    glColor3f(color_p3, color_p3, color_p3);
-                    glVertex3f(p3.x, p3.y, p3.z);
-
-                    glColor3f(color_p5, color_p5, color_p5);
-                    glVertex3f(p5.x, p5.y, p5.z);
-                    glColor3f(color_p3, color_p3, color_p3);
-                    glVertex3f(p3.x, p3.y, p3.z);
-                    glColor3f(color_p1, color_p1, color_p1);
-                    glVertex3f(p1.x, p1.y, p1.z);
-
-                    /* glColor3f(color_p1, color_p1, color_p1); */
-                    /* glVertex3f(p1.x, p1.y, p1.z);            */
-                    /* glColor3f(color_p2, color_p2, color_p2); */
-                    /* glVertex3f(p2.x, p2.y, p2.z);            */
-                    /* glColor3f(color_p4, color_p4, color_p4); */
-                    /* glVertex3f(p4.x, p4.y, p4.z);            */
-
-                    /* glColor3f(color_p1, color_p1, color_p1); */
-                    /* glVertex3f(p1.x, p1.y, p1.z);            */
-                    /* glColor3f(color_p4, color_p4, color_p4); */
-                    /* glVertex3f(p4.x, p4.y, p4.z);            */
-                    /* glColor3f(color_p3, color_p3, color_p3); */
-                    /* glVertex3f(p3.x, p3.y, p3.z);            */
-
-                    point.x += step_x;
-                }
-
-                point.y += step_y;
-            }
+            /* on passe à la caméra suivante */
             pcam = pcam->next;
         }
         glEnd();
@@ -417,6 +258,115 @@ construct_scene(void)
     glEndList();
 
     Rdbg(("construct_scene"));
+}
+
+/**
+ * Affiche l'image 3D d'une caméra
+ */
+void 
+display_cam(Camera_t *pcam,
+            float hscreen,
+            float wscreen,
+            float step_x,
+            float step_y)
+{
+    Edbg(("display_cam()"));
+
+    int i, j;
+    int width;
+    int height;
+    Point3d_t p1, p2, p3, p4, p5;
+    Color_t color_p1, color_p2, color_p3, color_p4, color_p5;
+    int nb_colors;
+    float step_z;
+    Point3d_t point;
+    unsigned char *labels = pcam->labels.Data;
+
+    point.z = 0;
+
+    point.y = -hscreen/2;
+    width = pcam->ii.XSize;
+    height = pcam->ii.YSize;
+    nb_colors = pcam->ii.ZSize;
+    step_z = pcam->range / pcam->nb_labels;
+    Dprintf((1,"caméra n°%d\n", pcam->id));
+    Dprintf((1,"width: %d\n", width));
+    Dprintf((1,"height: %d\n", height));
+    Dprintf((1,"step_z: %.3f\n", step_z));
+
+    /* on se déplace sur les y */
+    for (i=0; i<height-1; i++)
+    {
+        /* on va au début de la ligne suivante */
+        point.x = pcam->position - wscreen/2;
+
+        /* on se déplace sur les x */
+        for (j=0; j<width-1; j++)
+        {
+            /* Dprintf((1,"i: %d\tj: %d\n", i, j));     */
+            /* Dprintf((1,"point (%.3f, %.3f, %.3f)\n", */
+            /*          point.x, point.y, point.z));    */
+
+            /* on calcule les points */
+            p1 = point;
+            p2 = point; p2.x += step_x;
+            p3 = point; p3.y += step_y;
+            p4 = point; p4.x += step_x; p4.y += step_y;
+            p5 = point; p5.x += step_x/2; p5.y += step_y/2;
+
+            /* on place les points à la distance correspondant à leur
+             * étiquette */
+            deproj_point(&p1, &g_eye_pos, step_z, labels[i*width+j]);
+            deproj_point(&p2, &g_eye_pos, step_z, labels[i*width+(j+1)]);
+            deproj_point(&p3, &g_eye_pos, step_z, labels[(i+1)*width+j]);
+            deproj_point(&p4, &g_eye_pos, step_z, labels[(i+1)*width+(j+1)]);
+            deproj_point(&p5, &g_eye_pos, step_z, 
+                         InterpoleImg(j+0.5, i+0.5, 0, &(pcam->labels)));
+
+            /* on récupère les couleurs des points */
+            img_get_color(&color_p1, pcam, i, j, 0.0);
+            img_get_color(&color_p2, pcam, i, j+1, 0.0);
+            img_get_color(&color_p3, pcam, i+1, j, 0.0);
+            img_get_color(&color_p4, pcam, i+1, j+1, 0.0);
+            img_get_color(&color_p5, pcam, i, j, 0.5);
+
+            glColor3f(color_p5[0], color_p5[1], color_p5[2]);
+            glVertex3f(p5.x, p5.y, p5.z);
+            glColor3f(color_p1[0], color_p1[1], color_p1[2]);
+            glVertex3f(p1.x, p1.y, p1.z);
+            glColor3f(color_p2[0], color_p2[1], color_p2[2]);
+            glVertex3f(p2.x, p2.y, p2.z);
+
+            glColor3f(color_p5[0], color_p5[1], color_p5[2]);
+            glVertex3f(p5.x, p5.y, p5.z);
+            glColor3f(color_p2[0], color_p2[1], color_p2[2]);
+            glVertex3f(p2.x, p2.y, p2.z);
+            glColor3f(color_p4[0], color_p4[1], color_p4[2]);
+            glVertex3f(p4.x, p4.y, p4.z);
+
+            glColor3f(color_p5[0], color_p5[1], color_p5[2]);
+            glVertex3f(p5.x, p5.y, p5.z);
+            glColor3f(color_p4[0], color_p4[1], color_p4[2]);
+            glVertex3f(p4.x, p4.y, p4.z);
+            glColor3f(color_p3[0], color_p3[1], color_p3[2]);
+            glVertex3f(p3.x, p3.y, p3.z);
+
+            glColor3f(color_p5[0], color_p5[1], color_p5[2]);
+            glVertex3f(p5.x, p5.y, p5.z);
+            glColor3f(color_p3[0], color_p3[1], color_p3[2]);
+            glVertex3f(p3.x, p3.y, p3.z);
+            glColor3f(color_p1[0], color_p1[1], color_p1[2]);
+            glVertex3f(p1.x, p1.y, p1.z);
+
+            /* on passe au point suivant sur la ligne */
+            point.x += step_x;
+        }
+
+        /* on passe à la ligne suivante */
+        point.y += step_y;
+    }
+
+    Rdbg(("display_cam"));
 }
 
 /**
@@ -501,6 +451,7 @@ mouse_event(SDL_Event *event)
             g_rot_y = g_rot_y + event->motion.xrel;
         }
     }
+    /* si bouton gauche enfoncé tout seul, alors translation sur l'axe des Z */
     else if (state & SDL_BUTTON(1))
     {
         g_translate_z += (event->motion.xrel)/2.0;

@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: display.h,v 1.2 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:22 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: display.h,v 1.3 2004/04/16 17:31:22 arutha Exp $
  */
 /**
  * @file display.h
@@ -16,6 +16,7 @@
 
 #include <GL/glut.h>
 #include "SDL.h"
+#include "cameras.h"
 
 /** position de la fenêtre en X */
 #define WIN_POS_X 100
@@ -43,7 +44,7 @@
 /** far clipping plane */
 #define FAR_PLANE 1000.0
 /** position de la caméra */
-#define CAM_POS {0.0, 0.0, NEAR_PLANE, 1.0}
+#define EYE_POS {0.0, 0.0, NEAR_PLANE, 1.0}
 /** point de référence */
 #define REF_POINT {0.0, 0.0, 0.0, 1.0}
 /** vecteur UP pour la caméra */
@@ -53,6 +54,11 @@ void init_display();
 void start_display(void);
 void init_gl(void);
 void construct_scene(void);
+void display_cam(Camera_t *pcam,
+                 float hscreen,
+                 float wscreen,
+                 float step_x,
+                 float step_y);
 void refresh_display(void);
 void reshape_display(SDL_Event *event);
 void destroy_display(void);

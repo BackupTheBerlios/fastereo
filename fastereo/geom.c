@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: geom.c,v 1.2 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:23 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: geom.c,v 1.3 2004/04/16 17:31:23 arutha Exp $
  * Comments:
  */
 /**
@@ -16,6 +16,7 @@
 #include "dbg.h"
 #include "utils.h"
 #include "geom.h"
+#include "cameras.h"
 
 /**
  * Charge la matrice identité 4x4.
@@ -133,6 +134,24 @@ normalize3d(Vector3d_t *v)
     v->x /= n;
     v->y /= n;
     v->z /= n;
+}
+
+/**
+ * Déprojette un point 3D dans la scène
+ */
+void
+deproj_point(Point3d_t *point, Point3d_t *eye, float step_z, float label)
+{
+    Vector3d_t vdir;
+
+    vdir.x = point->x - eye->x;
+    vdir.y = point->y - eye->y;
+    vdir.z = point->z - eye->z;
+    normalize3d(&vdir);
+
+    point->x += label * step_z * vdir.x;
+    point->y += label * step_z * vdir.y;
+    point->z += label * step_z * vdir.z;
 }
 
 /* use 4 spaces as a tab please */

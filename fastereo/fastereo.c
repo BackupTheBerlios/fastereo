@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.8 $
- * ID:       $Id: fastereo.c,v 1.8 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:23 $
+ * Version:  $Revision: 1.9 $
+ * ID:       $Id: fastereo.c,v 1.9 2004/04/16 17:31:23 arutha Exp $
  * Comments:
  */
 /**
@@ -56,7 +56,9 @@ print_usage(void)
     printf("usage: fastereo <file.commands>\n"
            "\n"
            "options:\n"
-           "  -z\tdisplay in OpenGL\n");
+           "  -h\t\taffiche cet écran\n"
+           "  -g\t\tdisplay in OpenGL\n"
+           "  -z <zoom>\tzoom à appliquer aux images\n");
     Rdbg(("print_usage"));
 }
 
@@ -134,16 +136,17 @@ main(int argc,
     {
         /* on utilise atexit car glut ne dit pas quand il quitte le programme
          * (ce gros malin...) 
-         * cf 3.070 http://users.frii.com/martz/oglfaq/glut.htm */
+         * cf 3.070 http://users.frii.com/martz/oglfaq/glut.htm
+         * update: depuis j'utilise SDL mais je garde quand même atexit... */
         atexit(terminate_program_bis);
 
         init_display();
         start_display();
+        destroy_display();
     }
 
     /* nettoyage */
     destroy_cameras();
-    destroy_display();
 
     /* debug trace end */
     Rdbg(("main EXIT_SUCCESS"));

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 12:45:51 $
- * Version:  $Revision: 1.4 $
- * ID:       $Id: cameras.c,v 1.4 2004/04/15 12:45:51 arutha Exp $
+ * Date:     $Date: 2004/04/16 17:31:22 $
+ * Version:  $Revision: 1.5 $
+ * ID:       $Id: cameras.c,v 1.5 2004/04/16 17:31:22 arutha Exp $
  * Comments:
  */
 /**
@@ -343,6 +343,50 @@ load_depth_map(Camera_t *cam, const char *file_name, unsigned char nb_labels)
     }
 
     Rdbg(("load_depth_map RETURN_SUCCESS"));
+    return RETURN_SUCCESS;
+}
+
+/**
+ * Donne la couleur d'un pixel dans l'image
+ */
+int
+img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol)
+{
+    int nb_colors = pcam->ii.ZSize;
+    int width = pcam->ii.XSize;
+    int k;
+    float moy = 0.0;
+
+    if (NULL == pcam) return RETURN_FAILED;
+    if (NULL == pcam->ii.Data) return RETURN_FAILED;
+
+    if(interpol > 0.0)
+    {
+        for (k=0; k<nb_colors; k++)
+        {
+            (*color)[k] = InterpoleImg(j+interpol, i+interpol, k, &(pcam->ii));
+            (*color)[k] /= 255.0;
+            moy += (*color)[k];
+        }
+    }
+    else
+    {
+        for (k=0; k<nb_colors; k++)
+        {
+            (*color)[k] = pcam->ii.Data[(i*width+j)*nb_colors+k];
+            (*color)[k] /= 255.0;
+            moy += (*color)[k];
+        }
+    }
+
+    moy /= nb_colors;
+
+    /* on remplit les autres cases avec la première composante */
+    for (;k<4; k++)
+    {
+        (*color)[k] = moy;
+    }
+
     return RETURN_SUCCESS;
 }
 
