@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/30 14:42:55 $
- * Version:  $Revision: 1.6 $
- * ID:       $Id: display.c,v 1.6 2004/04/30 14:42:55 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.7 $
+ * ID:       $Id: display.c,v 1.7 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -36,6 +36,8 @@ unsigned int g_height = WIN_SIZE_Y;
 /** Variable indiquant le zoom à effectuer sur la fenêtre, par rapport aux
  * images chargées */
 float g_zoomim = ZOOM;
+/** taille d'un pixel: en fonction du zoom appliqué */
+GLfloat g_point_size = 1.0;
 
 /** objet display list pour contenir la scène statique */
 GLuint g_scene;
@@ -169,6 +171,12 @@ init_gl(void)
     glEnable(GL_DEPTH_TEST);
     /* glEnable(GL_SMOOTH); */
 
+    glEnable (GL_POINT_SMOOTH);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glHint (GL_POINT_SMOOTH_HINT, GL_DONT_CARE);
+    glPointSize(1.0);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
@@ -183,6 +191,7 @@ init_gl(void)
 
 /**
  * Construit la scène statique
+ * @param destroyDL détruire la display list avant de la construire à nouveau
  */
 void 
 construct_scene(char destroyDL)
@@ -194,14 +203,23 @@ construct_scene(char destroyDL)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glPointSize(g_point_size);
+
     /* on parcourt toutes les caméras */
     while (NULL != pcam)
     {
         /* printf("id: %d\n", pcam->id); */
+
+        /* on supprime la display list précédente */
         if (TRUE == destroyDL)
         {
             glDeleteLists(pcam->idGL, 1);
         }
+
+        /* on compile l'affichage dans la display list */
         pcam->idGL = glGenLists(1);
         glNewList(pcam->idGL, GL_COMPILE);
         display_cam(pcam);
@@ -211,11 +229,15 @@ construct_scene(char destroyDL)
         pcam = pcam->next;
     }
 
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
     Rdbg(("construct_scene"));
 }
 
 /**
  * Affiche l'image 3D d'une caméra
+ * @param pcam pointeur sur la caméra
  */
 void 
 display_cam(Camera_t *pcam)
@@ -225,16 +247,18 @@ display_cam(Camera_t *pcam)
     int i, j;
     int width;
     int height;
-    float d1, d2, d3, d4, d5;
-    Color_t color_p1, color_p2, color_p3, color_p4, color_p5;
+    float d;
     int nb_colors;
     imginfo *labels = &(pcam->labels);
-    Color_t *pshade = &(pcam->shade);
+    GLfloat *pshade = pcam->shade;
+    unsigned int ind;
+    GLfloat *vertices = NULL;
+    GLfloat *colors = NULL;
+    int size;
 
     width = pcam->ii.XSize;
     height = pcam->ii.YSize;
     nb_colors = pcam->ii.ZSize;
-    /* step_z = pcam->range / pcam->nb_labels; */
     Dprintf((1,"caméra n°%d\n", pcam->id));
     Dprintf((1,"width: %d\n", width));
     Dprintf((1,"height: %d\n", height));
@@ -242,9 +266,52 @@ display_cam(Camera_t *pcam)
              pcam->shade[0], pcam->shade[1], pcam->shade[2], pcam->shade[3]));
     Dprintf((1,"g_nb_labels: %d\n", g_nb_labels));
 
+    /* on réserve la mémoire */
+    size = pcam->ii.XSize * pcam->ii.YSize;
+    vertices = (GLfloat *) malloc(3*size*sizeof(GLfloat));
+    colors = (GLfloat *) malloc(3*size*sizeof(GLfloat));
+
+    /* on remplit les vertex arrays */
+    /* on se déplace sur les y */
+    for (j=0; j<height; j++)
+    {
+        /* on se déplace sur les x */
+        for (i=0; i<width; i++)
+        {
+            ind = (j*width + i)*3;
+            d = (labels->Data[j*labels->XSize + i]) / (float)(g_nb_labels-1);
+            img_get_color(&(colors[ind]), pcam, i , j , 0.0, g_depthmaps);
+            if (g_shading)
+            {
+                colors[ind] *= pshade[0];
+                colors[ind+1] *= pshade[1];
+                colors[ind+2] *= pshade[2];
+            }
+            vertices[ind] = i;
+            vertices[ind+1] = j;
+            vertices[ind+2] = d;
+        }
+    }
+
+    glColorPointer(3, GL_FLOAT, 0, colors);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+
     switch (g_mode)
     {
         case 0:
+            glBegin(GL_POINTS);
+            /* on se déplace sur les y */
+            for (j=0; j<height; j++)
+            {
+                /* on se déplace sur les x */
+                for (i=0; i<width; i++)
+                {
+                    glArrayElement(j*width+i);
+                }
+            }
+            glEnd();
+            break;
+        case 1:
             glBegin(GL_QUADS);
             /* on se déplace sur les y */
             for (j=0; j<height; j++)
@@ -252,31 +319,18 @@ display_cam(Camera_t *pcam)
                 /* on se déplace sur les x */
                 for (i=0; i<width; i++)
                 {
-                    /* Dprintf((1,"i: %d\tj: %d\n", i, j)); */
-
-                    /* on récupère les profondeurs */
-                    d1 = (labels->Data[j    *labels->XSize + i    ]) / (float)(g_nb_labels-1);
-                    /* Dprintf((1,"d1:%f\n", d1)); */
-                    /* Dprintf((1,"label1: %d\n", labels->Data[j*labels->XSize+i])); */
-
-                    /* on récupère les couleurs des points */
-                    img_get_color(&color_p1, pcam, i  , j  , 0.0, g_depthmaps);
-                    /* Dprintf((1,"c1: (%f,%f,%f,%f)\n", color_p1[0], color_p1[1], */
-                    /*          color_p1[2], color_p1[3]));                        */
-
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i-0.5, j-0.5, d1);
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i+0.5, j-0.5, d1);
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i+0.5, j+0.5, d1);
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i-0.5, j+0.5, d1);
+                    ind = (j*width + i)*3;
+                    d = vertices[ind+2];
+                    glColor3fv(&(colors[ind]));
+                    glVertex3f(i-0.5, j-0.5, d);
+                    glVertex3f(i+0.5, j-0.5, d);
+                    glVertex3f(i+0.5, j+0.5, d);
+                    glVertex3f(i-0.5, j+0.5, d);
                 }
             }
             glEnd();
             break;
-        case 1:
+        case 2:
             glBegin(GL_TRIANGLES);
             /* on se déplace sur les y */
             for (j=0; j<height-1; j++)
@@ -284,113 +338,25 @@ display_cam(Camera_t *pcam)
                 /* on se déplace sur les x */
                 for (i=0; i<width-1; i++)
                 {
-                    /* Dprintf((1,"i: %d\tj: %d\n", i, j)); */
+                    glArrayElement(j*width + i);
+                    glArrayElement(j*width + (i+1));
+                    glArrayElement((j+1)*width + (i+1));
 
-                    /* on récupère les profondeurs */
-                    d1 = (labels->Data[j    *labels->XSize + i    ]) / (float)(g_nb_labels-1);
-                    d2 = (labels->Data[j    *labels->XSize + (i+1)]) / (float)(g_nb_labels-1);
-                    d3 = (labels->Data[(j+1)*labels->XSize + i    ]) / (float)(g_nb_labels-1);
-                    d4 = (labels->Data[(j+1)*labels->XSize + (i+1)]) / (float)(g_nb_labels-1);
-                    d5 = (InterpoleImg(i+0.5, j+0.5, 0, labels))     / (float)(g_nb_labels-1);
-                    /* Dprintf((1,"d1:%f\td2:%f\td3:%f\td4:%f\td5:%f\n", d1, d2, d3, d4, d5)); */
-                    /* Dprintf((1,"label1: %d\n", labels->Data[j*labels->XSize+i]));           */
-                    /* Dprintf((1,"label2: %d\n", labels->Data[j*labels->XSize+(i+1)]));       */
-                    /* Dprintf((1,"label3: %d\n", labels->Data[(j+1)*labels->XSize+i]));       */
-                    /* Dprintf((1,"label4: %d\n", labels->Data[(j+1)*labels->XSize+(i+1)]));   */
-                    /* Dprintf((1,"label5: %f\n", InterpoleImg(i+0.5, j+0.5, 0, labels)));     */
-
-                    /* on récupère les couleurs des points */
-                    img_get_color(&color_p1, pcam, i  , j  , 0.0, g_depthmaps);
-                    img_get_color(&color_p2, pcam, i+1, j  , 0.0, g_depthmaps);
-                    img_get_color(&color_p3, pcam, i  , j+1, 0.0, g_depthmaps);
-                    img_get_color(&color_p4, pcam, i+1, j+1, 0.0, g_depthmaps);
-                    img_get_color(&color_p5, pcam, i  , j  , 0.5, g_depthmaps);
-                    /* Dprintf((1,"c1: (%f,%f,%f,%f)\n", color_p1[0], color_p1[1], */
-                    /*          color_p1[2], color_p1[3]));                        */
-                    /* Dprintf((1,"c2: (%f,%f,%f,%f)\n", color_p2[0], color_p2[1], */
-                    /*          color_p2[2], color_p2[3]));                        */
-                    /* Dprintf((1,"c3: (%f,%f,%f,%f)\n", color_p3[0], color_p3[1], */
-                    /*          color_p3[2], color_p3[3]));                        */
-                    /* Dprintf((1,"c4: (%f,%f,%f,%f)\n", color_p4[0], color_p4[1], */
-                    /*          color_p4[2], color_p4[3]));                        */
-                    /* Dprintf((1,"c5: (%f,%f,%f,%f)\n", color_p5[0], color_p5[1], */
-                    /*          color_p5[2], color_p5[3]));                        */
-
-                    /* set_color(&color_p1, pshade); */
-                    /* glVertex3f(i, j, d1);         */
-                    /* set_color(&color_p2, pshade); */
-                    /* glVertex3f(i+1, j, d2);       */
-                    /* set_color(&color_p4, pshade); */
-                    /* glVertex3f(i+1, j+1, d4);     */
-
-                    /* set_color(&color_p1, pshade); */
-                    /* glVertex3f(i, j, d1);         */
-                    /* set_color(&color_p4, pshade); */
-                    /* glVertex3f(i+1, j+1, d4);     */
-                    /* set_color(&color_p3, pshade); */
-                    /* glVertex3f(i, j+1, d3);       */
-
-                    set_color(&color_p5, pshade);
-                    glVertex3f(i+0.5, j+0.5, d5);
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i, j, d1);
-                    set_color(&color_p2, pshade);
-                    glVertex3f(i+1, j, d2);
-
-                    set_color(&color_p5, pshade);
-                    glVertex3f(i+0.5, j+0.5, d5);
-                    set_color(&color_p2, pshade);
-                    glVertex3f(i+1, j, d2);
-                    set_color(&color_p4, pshade);
-                    glVertex3f(i+1, j+1, d4);
-
-                    set_color(&color_p5, pshade);
-                    glVertex3f(i+0.5, j+0.5, d5);
-                    set_color(&color_p4, pshade);
-                    glVertex3f(i+1, j+1, d4);
-                    set_color(&color_p3, pshade);
-                    glVertex3f(i, j+1, d3);
-
-                    set_color(&color_p5, pshade);
-                    glVertex3f(i+0.5, j+0.5, d5);
-                    set_color(&color_p3, pshade);
-                    glVertex3f(i, j+1, d3);
-                    set_color(&color_p1, pshade);
-                    glVertex3f(i, j, d1);
+                    glArrayElement(j*width + i);
+                    glArrayElement((j+1)*width + (i+1));
+                    glArrayElement((j+1)*width + i);
                 }
             }
             glEnd();
             break;
     }
 
+    /* nettoyage */
+    free(vertices);
+    free(colors);
+
     Rdbg(("display_cam"));
 }
-
-/**
- * Applique une couleur
- */
-void set_color(Color_t *color, Color_t *shade)
-{
-    GLfloat c[4];
-
-    if (TRUE == g_shading)
-    {
-        c[0] = (*color)[0] * (*shade)[0];
-        c[1] = (*color)[1] * (*shade)[1];
-        c[2] = (*color)[2] * (*shade)[2];
-        c[3] = (*color)[3] * (*shade)[3];
-    }
-    else
-    {
-        c[0] = (*color)[0];
-        c[1] = (*color)[1];
-        c[2] = (*color)[2];
-        c[3] = (*color)[3];
-    }
-
-    glColor4fv(c);
-}
-
 
 /**
  * Raffraichit l'affichage OpenGL
@@ -411,6 +377,8 @@ refresh_display(void)
             * ((float)g_anim_keyframe/(g_anim_nb_keyframes))
             + g_anim_first_pos;
     }
+
+    glPointSize(g_point_size);
 
     /* on parcourt les caméras */
     while (NULL != pcam)
@@ -456,6 +424,9 @@ reshape_display(SDL_Event *event)
     g_height = event->resize.h;
     g_width = g_height * ratio;
 
+    g_point_size = (float)g_width / (float)(g_cameras.root->ii.XSize);
+    Dprintf((1,"g_point_size: %f\n", g_point_size));
+
     g_screen = SDL_SetVideoMode(g_width, g_height, 0, DISPLAY_MODE);
     glViewport(0, 0, g_width, g_height);
 
@@ -483,31 +454,19 @@ destroy_display(void)
 void 
 mouse_event(SDL_Event *event)
 {
-    /* Uint8 state;                                                                */
+    Uint8 state;
 
-    /* |+ on récupère l'état de la souris +|                                       */
-    /* state = SDL_GetMouseState(NULL, NULL);                                      */
+    /* on récupère l'état de la souris */
+    state = SDL_GetMouseState(NULL, NULL);
 
-    /* |+ bouton droit enfoncé? +|                                                 */
-    /* if (state & SDL_BUTTON(3))                                                  */
-    /* {                                                                           */
-    /*     |+ bouton gauche enfoncé = zoom +|                                      */
-    /*     if (state & SDL_BUTTON(1))                                              */
-    /*     {                                                                       */
-    /*         g_zoom += (event->motion.xrel)/2.0;                                 */
-    /*     }                                                                       */
-    /*     |+ sinon rotation +|                                                    */
-    /*     else                                                                    */
-    /*     {                                                                       */
-    /*         g_rot_x = g_rot_x + event->motion.yrel;                             */
-    /*         g_rot_y = g_rot_y + event->motion.xrel;                             */
-    /*     }                                                                       */
-    /* }                                                                           */
-    /* |+ si bouton gauche enfoncé tout seul, alors translation sur l'axe des Z +| */
-    /* else if (state & SDL_BUTTON(1))                                             */
-    /* {                                                                           */
-    /*     g_translate_z += (event->motion.xrel)/2.0;                              */
-    /* }                                                                           */
+    /* si bouton droit enfoncé */
+    if (state & SDL_BUTTON(3))
+    {
+    }
+    /* si bouton gauche enfoncé */
+    else if (state & SDL_BUTTON(1))
+    {
+    }
 }
 
 /**
@@ -572,13 +531,22 @@ keyboard_event(SDL_Event *event)
     }
     else if (SDLK_m == event->key.keysym.sym)
     {
-        g_mode = (g_mode+1)%2;
+        g_mode = (g_mode+1)%3;
         switch (g_mode)
         {
             case 0:
-                printf("Scène avec les carrés... ");
+                glEnable (GL_POINT_SMOOTH);
+                glEnable (GL_BLEND);
+                printf("Scène avec les points... ");
                 break;
             case 1:
+                glDisable (GL_POINT_SMOOTH);
+                glDisable (GL_BLEND);
+                printf("Scène avec les carrés... ");
+                break;
+            case 2:
+                glDisable (GL_POINT_SMOOTH);
+                glDisable (GL_BLEND);
                 printf("Scène avec les triangles... ");
                 break;
         }

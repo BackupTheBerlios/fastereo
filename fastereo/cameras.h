@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/30 14:42:55 $
- * Version:  $Revision: 1.8 $
- * ID:       $Id: cameras.h,v 1.8 2004/04/30 14:42:55 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.9 $
+ * ID:       $Id: cameras.h,v 1.9 2004/05/03 14:15:15 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -28,17 +28,17 @@
  */
 typedef struct Camera_t 
 {
-	int id;                  /**< identifiant de la caméra */
+    int id;                  /**< identifiant de la caméra */
     float position;          /**< position de la caméra */
-    Color_t shade;           /**< teinte qu'on doit donner à l'image lors de 
+    GLfloat shade[3];        /**< teinte qu'on doit donner à l'image lors de
                                l'affichage OpenGL */
-	float m[4][4];           /**< matrice de la caméra */
-	float mi[4][4];          /**< matrice inverse */
+    float m[4][4];           /**< matrice de la caméra */
+    float mi[4][4];          /**< matrice inverse */
     GLfloat mGL[16];         /**< matrice pour la caméra OpenGL */
-	imginfo ii;              /**< image associée à la caméra */
+    imginfo ii;              /**< image associée à la caméra */
     imginfo labels;          /**< carte de profondeurs */
-	struct Camera_t *next;   /**< pointeur sur la prochaine caméra */
-	struct Camera_t *prev;   /**< pointeur sur la caméra précédente */
+    struct Camera_t *next;   /**< pointeur sur la prochaine caméra */
+    struct Camera_t *prev;   /**< pointeur sur la caméra précédente */
     GLuint idGL;             /**< identifiant pour la display list OpenGL */
     char display;            /**< booléen qui indique s'il faut afficher 
                                l'image de cette caméra */
@@ -49,9 +49,9 @@ typedef struct Camera_t
  */
 typedef struct Cameras_t 
 {
-	int nb;         /**< nombre de caméras */
-	Camera_t *root; /**< pointeur sur la première caméra de la file */
-	Camera_t *last; /**< pointeur sur la dernière caméra de la file */
+    int nb;         /**< nombre de caméras */
+    Camera_t *root; /**< pointeur sur la première caméra de la file */
+    Camera_t *last; /**< pointeur sur la dernière caméra de la file */
 } Cameras_t;
 
 void init_cameras(void);
@@ -66,7 +66,7 @@ int load_depth_map(Camera_t *cam,
                    const char *file_name, 
                    int nb_labels);
 Camera_t *get_camera(int id);
-int img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol, 
+int img_get_color(GLfloat *color, Camera_t *pcam, int i, int j, float interpol, 
                   char dm);
 Point2d_t proj(Camera_t *cam, Point3d_t ptw);
 Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth);

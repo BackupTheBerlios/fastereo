@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/19 18:59:29 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: commands.h,v 1.5 2004/04/19 18:59:29 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: commands.h,v 1.6 2004/05/03 14:15:15 arutha Exp $
  */
 /**
  * @file: commands.h
@@ -44,18 +44,6 @@ int execute_commands(const char *file_name);
 int com_cameras(const char *command);
 int com_interpol(const char *command);
 int com_sequence(const char *command);
-
-// int simple_image(const stereo_mode_t mode,
-//                  const char *start_im,
-//                  const char *start_dm,
-//                  const char *end_im,
-//                  const char *end_dm,
-//                  const int nb_labels,
-//                  const float distance,
-//                  const float interpol,
-//                  const char *result_im,
-//                  const char *result_dm);
-// int merge_depth_maps();
 
 #endif /* _COMMANDS_H_ */
 

@@ -2,9 +2,9 @@
  * File:     $RCSfile: display.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: display.h,v 1.5 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: display.h,v 1.6 2004/05/03 14:15:15 arutha Exp $
  */
 /**
  * @file display.h
@@ -33,7 +33,7 @@
 #define DISPLAY_MODE SDL_OPENGL | SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_RESIZABLE
 // #define DISPLAY_MODE SDL_OPENGL
 /** zoom par rapport aux images chargées */
-#define ZOOM 2.0
+#define ZOOM 1.0
 
 /** couleur du fond */
 #define BG_COLOR 0.0, 0.0, 0.0, 0.0
@@ -46,7 +46,6 @@ void start_display(void);
 void init_gl(void);
 void construct_scene(char destroyDL);
 void display_cam(Camera_t *pcam);
-void set_color(Color_t *color, Color_t *tint);
 void refresh_display(void);
 void reshape_display(SDL_Event *event);
 void destroy_display(void);

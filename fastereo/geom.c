@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: geom.c,v 1.5 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: geom.c,v 1.6 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -37,6 +37,7 @@ load_identity(float m[4][4])
  * Inverse une matrice 4x4
  * @param min matrice 4x4 que l'on souhaite inverser
  * @param mout matrice 4x4 qui contiendra le résultat
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int 
 inv_matrix4(float min[4][4], float mout[4][4])
@@ -128,7 +129,8 @@ normalize3d(Vector3d_t *v)
 }
 
 /**
- * h_p2d
+ * Homogénéise un point 2D pour le ramener dans le système euclidien.
+ * @param p point 2D à homogénéiser
  */
 void h_p2d(Point2d_t *p)
 {
@@ -138,7 +140,8 @@ void h_p2d(Point2d_t *p)
 }
 
 /**
- * h_p3d
+ * Homogénéise un point 3D pour le ramener dans le système euclidien.
+ * @param p point 3D à homogénéiser
  */
 void h_p3d(Point3d_t *p)
 {
@@ -149,7 +152,10 @@ void h_p3d(Point3d_t *p)
 }
 
 /**
- * m3d_dot_p3d
+ * Applique une matrice à un point 3D
+ * @param m matrice 4x4
+ * @param p point 3D
+ * @return nouveau point 3D
  */
 Point3d_t m3d_dot_p3d(float m[4][4], Point3d_t p)
 {

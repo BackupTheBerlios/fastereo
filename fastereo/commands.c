@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/30 14:42:55 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: commands.c,v 1.5 2004/04/30 14:42:55 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: commands.c,v 1.6 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -22,7 +22,7 @@
 /**
  * Exécute les commandes contenues dans le fichier file_name.
  * @param file_name nom du fichier contenant les commandes.
- * @return différent de 0 si échec.
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int
 execute_commands(const char *file_name)
@@ -100,7 +100,7 @@ execute_commands(const char *file_name)
 /**
  * Analyse et extrait les informations de la commande 'cameras'
  * @param command buffer contenant la commande
- * @return différent de 0 si échec
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int
 com_cameras(const char *command)
@@ -128,6 +128,9 @@ com_cameras(const char *command)
 
 /**
  * Crée une image interpolée à partir des autres caméras
+ * [PAS FINI]
+ * @param command buffer contenant la commande
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int
 com_interpol(const char *command)
@@ -180,6 +183,9 @@ com_interpol(const char *command)
 
 /**
  * Crée une séquence d'images interpolées à partir des autres caméras
+ * [PAS FINI]
+ * @param command buffer contenant la commande
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int
 com_sequence(const char *command)

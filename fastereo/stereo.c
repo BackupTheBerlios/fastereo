@@ -2,9 +2,9 @@
  * File:     $RCSfile: stereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/26 20:24:40 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: stereo.c,v 1.2 2004/04/26 20:24:40 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: stereo.c,v 1.3 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -21,9 +21,11 @@
 
 /**
  * Crée une image interpolée à partir des autres caméras
+ * [PAS FINI]
  * @param position position de l'image interpolée
  * @param image buffer pour contenir l'image interpolée
  * @param depth_map buffer pour contenir la carte de profondeurs
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int 
 interpol(float position, char *image, char *depth_map)

@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/30 14:42:55 $
- * Version:  $Revision: 1.8 $
- * ID:       $Id: cameras.c,v 1.8 2004/04/30 14:42:55 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.9 $
+ * ID:       $Id: cameras.c,v 1.9 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -48,6 +48,7 @@ init_cameras(void)
 /**
  * Libère la mémoire occupée par la caméra et celles qui suivent dans la liste.
  * Cette fonction s'appelle récursivement.
+ * @param camera caméra à détruire
  */
 void 
 destroy_camera(Camera_t *camera)
@@ -105,13 +106,12 @@ load_cameras(const char *file_name)
     char image[MAX_LNAME];
     char depth_map[MAX_LNAME];
     int nb_labels;
-    Color_t shade;
+    GLfloat shade[3];
     float dmin, dmax;
 
     /* initialisation */
     g_cameras.root = NULL;
     g_cameras.nb = 0;
-    shade[3] = 1.0;
 
     /* ouverture du fichier */
     fd = fopen(file_name, "r");
@@ -243,7 +243,6 @@ load_cameras(const char *file_name)
                         cam->shade[0] = shade[0];
                         cam->shade[1] = shade[1];
                         cam->shade[2] = shade[2];
-                        cam->shade[3] = 1.0;
 
                         /* g_enable_shade = TRUE; */
                     }
@@ -385,7 +384,6 @@ add_camera(const int id,
     cam->shade[0] = 1.0;
     cam->shade[1] = 1.0;
     cam->shade[2] = 1.0;
-    cam->shade[3] = 1.0;
 
     /* on augmente le nombre de caméras */
     g_cameras.nb++;
@@ -457,9 +455,17 @@ get_camera(int id)
 
 /**
  * Donne la couleur d'un pixel dans l'image
+ * @param color tableau de 3 GLfloat pour contenir les couleurs du pixel
+ * @param pcam pointeur sur la caméra
+ * @param i coordonnée x du pixel
+ * @param j coordonnée y du pixel
+ * @param interpol interpolation si voulue, 0 sinon
+ * @param dm TRUE si on veut les couleurs de la carte de profondeurs à la place
+ *              des vraies couleurs
+ * @return RETURN_SUCCESS si succès, RETURN_FAILED sinon
  */
 int
-img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol, 
+img_get_color(GLfloat *color, Camera_t *pcam, int i, int j, float interpol, 
               char dm)
 {
     int nb_colors;
@@ -484,23 +490,27 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol,
     nb_colors = pii->ZSize;
     width = pii->XSize;
 
+    if (nb_colors > 3) 
+    {
+        nb_colors = 3;
+    }
 
     if(interpol > 0.0)
     {
         for (k=0; k<nb_colors; k++)
         {
-            (*color)[k] = InterpoleImg(i+interpol, j+interpol, k, pii);
-            (*color)[k] /= 255.0;
-            moy += (*color)[k];
+            color[k] = InterpoleImg(i+interpol, j+interpol, k, pii);
+            color[k] /= 255.0;
+            moy += color[k];
         }
     }
     else
     {
         for (k=0; k<nb_colors; k++)
         {
-            (*color)[k] = pii->Data[(j*width+i)*nb_colors+k];
-            (*color)[k] /= 255.0;
-            moy += (*color)[k];
+            color[k] = pii->Data[(j*width+i)*nb_colors+k];
+            color[k] /= 255.0;
+            moy += color[k];
         }
     }
 
@@ -509,16 +519,15 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol,
     /* on remplit les autres cases avec la moyenne des premières composantes */
     for (;k<3; k++)
     {
-        (*color)[k] = moy;
+        color[k] = moy;
     }
-    if(nb_colors < 4) (*color)[k] = 1.0;
+    /* if(nb_colors < 4) (*color)[k] = 1.0; */
 
     if (dm)
     {
         for (k=0; k<3; k++)
         {
-            (*color)[k] = 
-                ((int)(255*(*color)[k]/(g_nb_labels-1.0)*255+0.5))/255.0;
+            color[k] = ((int)(255*color[k]/(g_nb_labels-1.0)*255+0.5))/255.0;
         }
     }
 
@@ -526,7 +535,10 @@ img_get_color(Color_t *color, Camera_t *pcam, int i, int j, float interpol,
 }
 
 /**
- * proj
+ * Projette un point 3D dans une caméra
+ * @param cam pointeur sur la caméra
+ * @param ptw point 3D
+ * @return point 2D projetté
  */
 Point2d_t proj(Camera_t *cam, Point3d_t ptw)
 {
@@ -545,7 +557,11 @@ Point2d_t proj(Camera_t *cam, Point3d_t ptw)
 }
 
 /**
- * deproj
+ * Déprojette un point 2D dans le monde 3D
+ * @param cam pointeur sur la caméra
+ * @param pti point 2D en coordonnées pixel dans l'image
+ * @param depth profondeur 1/z à laquelle déprojetter le point
+ * @return point 3D déprojetté
  */
 Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth)
 {
@@ -570,6 +586,9 @@ Point3d_t deproj(Camera_t *cam, Point2d_t pti, float depth)
 
 /**
  * Donne la profondeur 1/z qui correspond à une étiquette.
+ * @param pcam pointeur sur la caméra
+ * @param label étiquette
+ * @return profondeur 1/z
  */
 float label2depth(Camera_t *pcam, int label)
 {

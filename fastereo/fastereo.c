@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/30 14:42:55 $
- * Version:  $Revision: 1.12 $
- * ID:       $Id: fastereo.c,v 1.12 2004/04/30 14:42:55 arutha Exp $
+ * Date:     $Date: 2004/05/03 14:15:15 $
+ * Version:  $Revision: 1.13 $
+ * ID:       $Id: fastereo.c,v 1.13 2004/05/03 14:15:15 arutha Exp $
  * Comments:
  */
 /**
@@ -22,10 +22,9 @@
 #include "display.h"
 
 /**
- * Appelée lors Ctrl-C.
  * S'occupe du nettoyage...
  */
-void terminate_program(int n)
+void terminate_program()
 {
     Edbg(("terminate_program()"));
 
@@ -38,12 +37,12 @@ void terminate_program(int n)
 }
 
 /**
- * Même fonction que terminate_program mais adaptée pour atexit.
+ * Appelée lors Ctrl-C.
  * S'occupe du nettoyage...
  */
-void terminate_program_bis()
+void terminate_program_catch(int n)
 {
-    terminate_program(0);
+    terminate_program();
 }
 
 /**
@@ -53,9 +52,9 @@ void
 print_usage(void)
 {
     Edbg(("print_usage()"));
-    printf("usage: fastereo <file.commands>\n"
+    printf("Usage: fastereo <file.commands>\n"
            "\n"
-           "options:\n"
+           "Options:\n"
            "  -h\t\t\tAffiche cet écran\n"
            "  -g\t\t\tAffichage OpenGL\n"
            "  -a <nb_keyframes>\tNombre de keyframes dans l'animation en OpenGL"
@@ -126,7 +125,7 @@ main(int argc, char *argv[])
     }
 
 	/* on catche le Ctrl-C */
-	act.sa_handler = terminate_program;
+	act.sa_handler = terminate_program_catch;
 	sigfillset(&(act.sa_mask));
 	sigaction(SIGINT, &act, NULL);
 
@@ -153,7 +152,7 @@ main(int argc, char *argv[])
          * (ce gros malin...) 
          * cf 3.070 http://users.frii.com/martz/oglfaq/glut.htm
          * update: depuis j'utilise SDL mais je garde quand même atexit... */
-        atexit(terminate_program_bis);
+        atexit(terminate_program);
 
         init_display();
         start_display();
