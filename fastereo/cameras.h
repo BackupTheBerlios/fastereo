@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 23:59:49 $
- * Version:  $Revision: 1.1 $
- * ID:       $Id: cameras.h,v 1.1 2004/04/13 23:59:49 arutha Exp $
+ * Date:     $Date: 2004/04/14 05:39:33 $
+ * Version:  $Revision: 1.2 $
+ * ID:       $Id: cameras.h,v 1.2 2004/04/14 05:39:33 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -23,17 +23,28 @@
 /** La taille maximale que peut avoir un chemin vers un fichier */
 #define MAX_LNAME 1024
 
-typedef struct Camera {
-	int id;                /**< identifiant de la caméra */
-	float m[4][4];         /**< matrice de la caméra */
-	float mi[4][4];        /**< matrice inverse */
-	char img[MAX_LNAME];   /**< nom du fichier de l'image */
-	char dm[MAX_LNAME];    /**< nom du fichier de la carte de profondeur */
-	imginfo ii;            /**< structure image */
-	struct Camera *next; /**< pointeur sur la prochaine caméra */
+/**
+ * @brief Structure représentant une caméra
+ */
+typedef struct Camera_t 
+{
+	int id;                  /**< identifiant de la caméra */
+	float m[4][4];           /**< matrice de la caméra */
+	float mi[4][4];          /**< matrice inverse */
+    // char img[MAX_LNAME];     /**< nom du fichier de l'image */
+    // char dm[MAX_LNAME];      /**< nom du fichier de la carte de profondeur */
+	imginfo ii;              /**< structure image */
+    unsigned char *labels;   /**< carte de profondeur */
+    unsigned char nb_labels; /**< nombre d'étiquettes */
+	struct Camera_t *next;   /**< pointeur sur la prochaine caméra */
+	struct Camera_t *prev;   /**< pointeur sur la caméra précédente */
 } Camera_t;
 
-typedef struct {
+/**
+ * @brief Structure pour gérer une liste de caméras
+ */
+typedef struct Cameras_t 
+{
 	int nb;         /**< nombre de caméras */
 	Camera_t *root; /**< première caméra de la file */
 	Camera_t *last; /**< pointeur sur la dernière caméra de la file */
@@ -46,7 +57,11 @@ void destroy_camera(Camera_t *camera);
 Camera_t *add_camera(const int id, 
                      const float position, 
                      const char *image, 
-                     const char *depth_map);
+                     const char *depth_map,
+                     const unsigned char nb_labels);
+int load_depth_map(Camera_t *cam, 
+                   const char *file_name, 
+                   unsigned char nb_labels);
 
 extern Cameras_t g_cameras;
 

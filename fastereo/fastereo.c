@@ -2,9 +2,9 @@
  * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 23:59:49 $
- * Version:  $Revision: 1.5 $
- * ID:       $Id: fastereo.c,v 1.5 2004/04/13 23:59:49 arutha Exp $
+ * Date:     $Date: 2004/04/14 05:39:33 $
+ * Version:  $Revision: 1.6 $
+ * ID:       $Id: fastereo.c,v 1.6 2004/04/14 05:39:33 arutha Exp $
  * Comments:
  */
 /**
@@ -86,6 +86,9 @@ main(int argc,
         destroy_cameras();
         return EXIT_FAILURE;
     }
+
+    /* nettoyage */
+    destroy_cameras();
 
     /* debug trace end */
     Rdbg(("main EXIT_SUCCESS"));

@@ -2,9 +2,9 @@
  * File:     $RCSfile: commands.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 23:59:49 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: commands.h,v 1.3 2004/04/13 23:59:49 arutha Exp $
+ * Date:     $Date: 2004/04/14 05:39:33 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: commands.h,v 1.4 2004/04/14 05:39:33 arutha Exp $
  */
 /**
  * @file: commands.h
@@ -24,7 +24,8 @@
 /**
  * Définit les modes
  */
-typedef enum {
+typedef enum 
+{
     INTENSITIES = 1,
     DEPTH_MAPS = 2
 } Stereo_mode_t;
@@ -32,7 +33,8 @@ typedef enum {
 /**
  * Définit les actions possibles
  */
-typedef enum {
+typedef enum 
+{
     SIMPLE = 1,
     SEQUENCE = 2,
     OPENGL = 3
