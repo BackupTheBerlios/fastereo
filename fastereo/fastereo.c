@@ -1,8 +1,10 @@
 /*
- * File:     fastereo.c
+ * File:     $Source: /home/xubuntu/berlios_backup/github/tmp-cvs/fastereo/Repository/fastereo/fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
- * Date:     12 april 2004
- * Version:  0.1
+ *               from University of Montreal
+ * Date:     $Date: 2004/04/13 18:59:04 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: fastereo.c,v 1.3 2004/04/13 18:59:04 arutha Exp $
  * Comments:
  */
 
@@ -18,23 +20,17 @@ void
 print_usage(void)
 {
     Edbg(("print_usage()"));
-    printf("usage: fastereo <start_im> <start_dm> <end_im> <end_dm> <nb_labels>"
-           " <distance> <interpol> <result_img>\n"
+    printf("usage: fastereo <file.commands>\n"
            "\n"
            "options:\n"
-           "  -i\t\tfast stereo merging intensities\n"
-           "  -m\t\tfast stereo merging depth maps\n"
-           "  -x\t\tx coordinate or moving vector\n"
-           "  -y\t\ty coordinate or moving vector\n"
-           "  -s <nb>\tgenerate a sequence of images\n"
-           "  -z\t\tdisplay in OpenGL\n");
+           "  -z\tdisplay in OpenGL\n");
     Rdbg(("print_usage"));
 }
 
 /**
- * Main function
- * @param argc number of arguments
- * @param argv arrays of arguments
+ * Fonction principale
+ * @param argc nombre d'arguments
+ * @param argv tableau d'arguments
  * @return program exit code
  */
 int
@@ -49,31 +45,18 @@ main(argc, argv)
     int c;
     stereo_mode_t mode = INTENSITIES;
     action_t action = SIMPLE;
-    int seq_nb = 0;
+    int ret;
 
     /* on récupère les options */
-    while( (c = getopt(argc, argv, "hims:z")) >= 0) 
+    while( (c = getopt(argc, argv, "hz")) >= 0) 
     {
         switch(c) 
         {
             case 'h':
                 /* print help */
                 print_usage();
-                Rdbg(("main return 0"));
-                return 0;
-            case 'i':
-                /* fast stereo merging intensities */
-                mode = INTENSITIES;
-                break;
-            case 'm':
-                /* fast stereo merging intensities */
-                mode = DEPTH_MAPS;
-                break;
-            case 's':
-                /* create a sequence of image */
-                action = SEQUENCE;
-                seq_nb = strtol(optarg, (char **)NULL, 10);
-                break;
+                Rdbg(("main return EXIT_SUCCESS"));
+                return EXIT_SUCCESS;
             case 'z':
                 /* display in OpenGL */
                 action = OPENGL;
@@ -82,9 +65,20 @@ main(argc, argv)
         }
     }
 
+    /* il faut le nom du fichier de commandes dans les arguments */
+    if((argc-optind) != 1)
+    {
+        print_usage();
+        Rdbg(("main return EXIT_FAILURE"));
+        return EXIT_FAILURE;
+    }
+
+    /* on charge les commandes */
+    ret = execute_commands(argv[optind]);
+
     /* debug trace end */
-    Rdbg(("main 0"));
-    return 0;
+    Rdbg(("main EXIT_SUCCESS"));
+    return EXIT_SUCCESS;
 }
 
 /* use 4 spaces as a tab please */
