@@ -1,0 +1,12 @@
+# il faut d'abord définir les caractéristiques des depth maps que l'on
+# va utiliser grâce à la commande:
+
+# depth_maps nb_labels dmin dmax
+
+# camera id position image [depth_map]
+
+depthmaps 25 0.0 12.0
+camera 1 0.0 pm/PM-2.pgm pm/PM-2_dm.pgm
+camera 2 -1.0 pm/PM-14.pgm pm/PM-14_dm.pgm
+shade 1 1.0 0.5 0.5
+shade 2 0.5 1.0 0.5
