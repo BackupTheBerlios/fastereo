@@ -21,4 +21,9 @@ Touches au clavier:
   M                 Changer de mode d'affichage (points, carrés, triangles)
   F1, F2, etc       Afficher ou non les images 1, 2, etc.
 
-$Id: MANUAL,v 1.1 2004/05/05 19:26:05 arutha Exp $
+Exemples:
+  $ ./fastereo -g pm.commands
+  Avec les traces de debug:
+  $ ./fastereo -g pm.commands -@
+
+$Id: MANUAL,v 1.2 2004/05/05 21:15:21 arutha Exp $
