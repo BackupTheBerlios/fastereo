@@ -83,7 +83,7 @@ main(argc, argv)
     }
 
     /* debug trace end */
-    Rdbg(("main return 0"));
+    Rdbg(("main 0"));
     return 0;
 }
 

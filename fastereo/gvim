@@ -7,4 +7,3 @@ FILES="${FILES} Makefile.am configure.in"
 
 ./ctags
 gvim -c "silent! source session" -c "autocmd VimLeavePre * mksession! session" -c "noh" $FILES
-#gvim rapport/rapport.tex
