@@ -2,33 +2,44 @@
  * File:     $RCSfile: commands.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 19:07:20 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: commands.h,v 1.2 2004/04/13 19:07:20 arutha Exp $
- * Comments:
+ * Date:     $Date: 2004/04/13 23:59:49 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: commands.h,v 1.3 2004/04/13 23:59:49 arutha Exp $
+ */
+/**
+ * @file: commands.h
+ * @brief Gestion des commandes.
  */
 
 #ifndef _COMMANDS_H_
 #define _COMMANDS_H_
 
+#include "cameras.h"
+
+/** 
+ * La taille maximale que peut avoir une ligne dans un fichier *.commands
+ */
+#define MAX_LLINE_COMMANDS 1024
+
 /**
- * Defines modes
+ * Définit les modes
  */
 typedef enum {
     INTENSITIES = 1,
     DEPTH_MAPS = 2
-} stereo_mode_t;
+} Stereo_mode_t;
 
 /**
- * Defines possible actions
+ * Définit les actions possibles
  */
 typedef enum {
     SIMPLE = 1,
     SEQUENCE = 2,
     OPENGL = 3
-} action_t;
+} Action_t;
 
 int execute_commands(const char *file_name);
+int com_cameras(const char *command);
 
 // int simple_image(const stereo_mode_t mode,
 //                  const char *start_im,
@@ -45,4 +56,4 @@ int execute_commands(const char *file_name);
 #endif /* _COMMANDS_H_ */
 
 /* use 4 spaces as a tab please */
-/* vim: set ts=4 sw=4 et cino=t0(0: */
+/* vim: set ts=4 sts=4 sw=4 et cino=t0(0: */

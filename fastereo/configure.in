@@ -81,4 +81,6 @@ else
 fi
 AC_SUBST(GL_LIBS)
 
+AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, true)
+
 AC_OUTPUT(Makefile)

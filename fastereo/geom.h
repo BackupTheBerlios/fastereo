@@ -2,24 +2,40 @@
  * File:     $RCSfile: geom.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 19:07:20 $
- * Version:  $Revision: 1.2 $
- * ID:       $Id: geom.h,v 1.2 2004/04/13 19:07:20 arutha Exp $
+ * Date:     $Date: 2004/04/13 23:59:49 $
+ * Version:  $Revision: 1.3 $
+ * ID:       $Id: geom.h,v 1.3 2004/04/13 23:59:49 arutha Exp $
  * Comments:
+ */
+/**
+ * @file: geom.h
+ * @brief Fonctions géométriques.
  */
 
 #ifndef _GEOM_H_
 #define _GEOM_H_
 
 /**
- * A vector in 2 dimensions
+ * @brief Un vecteur en 2 dimensions
  */
 typedef struct {
-    float x;
-    float y;
-} vector2d_t;
+    float x; /**< coordonnée en X */
+    float y; /**< coordonnée en Y */
+} Vector2d_t;
+
+/**
+ * @brief Un vecteur en 3 dimensions
+ */
+typedef struct {
+    float x; /**< coordonnée en X */
+    float y; /**< coordonnée en Y */
+    float z; /**< coordonnée en Z */
+} Vector3d_t;
+
+void load_identity(float m[4][4]);
+int inv_matrix4(float min[4][4], float mout[4][4]);
 
 #endif /* _GEOM_H_ */
 
 /* use 4 spaces as a tab please */
-/* vim: set ts=4 sw=4 et cino=t0(0: */
+/* vim: set ts=4 sts=4 sw=4 et cino=t0(0: */

@@ -1,0 +1,4 @@
+cameras sample.cameras
+
+interpol position image [depth_map]
+sequence nb pattern_img [pattern_dm]

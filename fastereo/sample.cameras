@@ -1,0 +1,2 @@
+camera id position image [depth_map]
+camera 0 0.0 toto.pgm toto_dm.pgm
