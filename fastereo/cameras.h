@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.h,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 05:21:22 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: cameras.h,v 1.3 2004/04/15 05:21:22 arutha Exp $
+ * Date:     $Date: 2004/04/15 12:45:51 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: cameras.h,v 1.4 2004/04/15 12:45:51 arutha Exp $
  */
 /**
  * @file cameras.h
@@ -27,12 +27,13 @@
 typedef struct Camera_t 
 {
 	int id;                  /**< identifiant de la caméra */
+    float position;          /**< position de la caméra */
 	float m[4][4];           /**< matrice de la caméra */
 	float mi[4][4];          /**< matrice inverse */
     // char img[MAX_LNAME];     /**< nom du fichier de l'image */
     // char dm[MAX_LNAME];      /**< nom du fichier de la carte de profondeur */
 	imginfo ii;              /**< structure image */
-    unsigned char *labels;   /**< carte de profondeur */
+    imginfo labels;          /**< carte de profondeur */
     unsigned char nb_labels; /**< nombre d'étiquettes */
     float range;             /**< étendue sur laquelle s'étale les étiquettes */
 	struct Camera_t *next;   /**< pointeur sur la prochaine caméra */

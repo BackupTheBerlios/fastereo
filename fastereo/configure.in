@@ -49,13 +49,13 @@ esac
 AC_SUBST(MATHLIB)
 
 dnl Check for SDL
-dnl SDL_VERSION=1.2.0
-dnl AM_PATH_SDL($SDL_VERSION,
-dnl             :,
-dnl 	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
-dnl )
-dnl CFLAGS="$CFLAGS $SDL_CFLAGS"
-dnl LIBS="$LIBS $SDL_LIBS"
+SDL_VERSION=1.2.0
+AM_PATH_SDL($SDL_VERSION,
+            :,
+	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
+)
+CFLAGS="$CFLAGS $SDL_CFLAGS"
+LIBS="$LIBS $SDL_LIBS"
 
 dnl Check for OpenGL
 AC_MSG_CHECKING(for OpenGL support)
@@ -82,26 +82,26 @@ fi
 AC_SUBST(GL_LIBS)
 
 dnl Check for GLUT
-AC_MSG_CHECKING(for GLUT support)
-have_glut=no
-AC_TRY_COMPILE([
- #if defined(__APPLE__) && defined(__MACH__)
- #include <OpenGL/glut.h>
- #else
- #include <GL/glut.h>
- #endif
-],[
-],[
-have_glut=yes
-])
-AC_MSG_RESULT($have_glut)
-if test x$have_glut = xyes; then
-    CFLAGS="$CFLAGS -DHAVE_GLUT"
-    GLUT_LIBS="-lglut"
-else
-    AC_MSG_ERROR(Unable to find GLUT headers and libraries)
-fi
-AC_SUBST(GLUT_LIBS)
+dnl AC_MSG_CHECKING(for GLUT support)
+dnl have_glut=no
+dnl AC_TRY_COMPILE([
+dnl  #if defined(__APPLE__) && defined(__MACH__)
+dnl  #include <OpenGL/glut.h>
+dnl  #else
+dnl  #include <GL/glut.h>
+dnl  #endif
+dnl ],[
+dnl ],[
+dnl have_glut=yes
+dnl ])
+dnl AC_MSG_RESULT($have_glut)
+dnl if test x$have_glut = xyes; then
+dnl     CFLAGS="$CFLAGS -DHAVE_GLUT"
+dnl     GLUT_LIBS="-lglut"
+dnl else
+dnl     AC_MSG_ERROR(Unable to find GLUT headers and libraries)
+dnl fi
+dnl AC_SUBST(GLUT_LIBS)
 
 AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, true)
 

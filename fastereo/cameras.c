@@ -2,9 +2,9 @@
  * File:     $RCSfile: cameras.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/15 05:21:22 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: cameras.c,v 1.3 2004/04/15 05:21:22 arutha Exp $
+ * Date:     $Date: 2004/04/15 12:45:51 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: cameras.c,v 1.4 2004/04/15 12:45:51 arutha Exp $
  * Comments:
  */
 /**
@@ -45,7 +45,7 @@ init_cameras(void)
 void 
 destroy_camera(Camera_t *camera)
 {
-    Edbg(("destroy_camera(camera=p)", camera));
+    Edbg(("destroy_camera(camera=%p)", camera));
 
     if (NULL != camera)
     {
@@ -55,10 +55,7 @@ destroy_camera(Camera_t *camera)
             destroy_camera(camera->next);
         }
         FreeImage(&(camera->ii));
-        if (NULL != camera->labels)
-        {
-            free(camera->labels);
-        }
+        FreeImage(&(camera->labels));
         free(camera);
     }
 
@@ -140,7 +137,7 @@ load_cameras(const char *file_name)
 
                 Dprintf((1,"Données extraites:\n"));
                 Dprintf((1,"id: %d\n", id));
-                Dprintf((1,"position: %.3d\n", position));
+                Dprintf((1,"position: %.3f\n", position));
                 Dprintf((1,"image: %s\n", image));
                 Dprintf((1,"depth_map: %s\n", depth_map));
                 Dprintf((1,"nb_labels: %d\n", nb_labels));
@@ -253,6 +250,7 @@ add_camera(const int id,
         Rdbg(("add_camera NULL"));
         return NULL;
     }
+    SaveImage("hh.pgm", &(cam->ii));
 
     /* on charge la carte de profondeurs si elle existe */
     if (NULL != depth_map)
@@ -279,7 +277,7 @@ add_camera(const int id,
     }
     else
     {
-        cam->labels = NULL;
+        cam->labels.Data = NULL;
         cam->nb_labels = 0;
         cam->range = 0.0;
     }
@@ -293,11 +291,17 @@ add_camera(const int id,
     /* {                                           */
     /*     cam->dm[0] = '\0';                      */
     /* }                                           */
+    cam->position = position;
     cam->next = NULL;
     cam->prev = prev;
     load_identity(cam->m);
     cam->m[0][3] = position;
     inv_matrix4(cam->m, cam->mi);
+
+    /* on augmente le nombre de caméras */
+    g_cameras.nb++;
+    /* on met à jour le pointeur sur la dernière caméra */
+    g_cameras.last = cam;
 
     Rdbg(("add_camera cam=%p", cam));
     return cam;
@@ -319,40 +323,24 @@ load_depth_map(Camera_t *cam, const char *file_name, unsigned char nb_labels)
     int i;
     int L;
     float d;
-    imginfo ii;
 
     /* on charge l'image */
-    if (LoadImage((char *)file_name, &ii))
+    if (LoadImage((char *)file_name, &(cam->labels)))
     {
-        cam->labels = NULL;
         cam->nb_labels = 0;
         Dprintf((1,"LoadImage failed!\n"));
-        Rdbg(("load_depth_map RETURN_FAILED"));
-        return RETURN_FAILED;
-    }
-
-    /* on alloue l'espace nécessaire */
-    L = ii.XSize * ii.YSize;
-    cam->labels = (unsigned char *) malloc(L*sizeof(unsigned char));
-    if (NULL == cam->labels)
-    {
-        cam->labels = NULL;
-        cam->nb_labels = 0;
-        Dprintf((1,"malloc failed!\n"));
         Rdbg(("load_depth_map RETURN_FAILED"));
         return RETURN_FAILED;
     }
     cam->nb_labels = nb_labels;
 
     /* on convertit les intensités en étiquettes */
+    L = cam->labels.XSize * cam->labels.YSize;
     d = (nb_labels-1.0)/255;
     for (i=0; i<L; i++)
     {
-        cam->labels[i] = (int)(ii.Data[i]*d + 0.5);
+        cam->labels.Data[i] = (int)(cam->labels.Data[i]*d + 0.5);
     }
-
-    /* nettoyage */
-    FreeImage(&ii);
 
     Rdbg(("load_depth_map RETURN_SUCCESS"));
     return RETURN_SUCCESS;

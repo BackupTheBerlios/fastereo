@@ -2,9 +2,9 @@
  * File:     $RCSfile: geom.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 23:59:49 $
- * Version:  $Revision: 1.1 $
- * ID:       $Id: geom.c,v 1.1 2004/04/13 23:59:49 arutha Exp $
+ * Date:     $Date: 2004/04/15 12:45:51 $
+ * Version:  $Revision: 1.2 $
+ * ID:       $Id: geom.c,v 1.2 2004/04/15 12:45:51 arutha Exp $
  * Comments:
  */
 /**
@@ -12,8 +12,10 @@
  * @brief Fonctions géométriques.
  */
 
+#include <math.h>
 #include "dbg.h"
 #include "utils.h"
+#include "geom.h"
 
 /**
  * Charge la matrice identité 4x4.
@@ -90,6 +92,47 @@ inv_matrix4(float min[4][4], float mout[4][4])
 
     Rdbg(("inv_matrix4 RETURN_SUCCESS"));
     return RETURN_SUCCESS;
+}
+
+/**
+ * Normalise un vecteur en 2 dimensions
+ * @param v un pointeur sur le vecteur à normaliser
+ */
+void 
+normalize2d(Vector2d_t *v)
+{
+    if (NULL == v) 
+    {
+        Rdbg(("normalize2d"));
+        return;
+    }
+
+    float n = v->x * v->x + v->y * v->y;
+    n = sqrt(n);
+
+    v->x /= n;
+    v->y /= n;
+}
+
+/**
+ * Normalise un vecteur en 3 dimensions
+ * @param v un pointeur sur le vecteur à normaliser
+ */
+void 
+normalize3d(Vector3d_t *v)
+{
+    if (NULL == v) 
+    {
+        Rdbg(("normalize3d"));
+        return;
+    }
+
+    float n = v->x * v->x + v->y * v->y + v->z * v->z;
+    n = sqrt(n);
+
+    v->x /= n;
+    v->y /= n;
+    v->z /= n;
 }
 
 /* use 4 spaces as a tab please */

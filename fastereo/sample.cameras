@@ -1,3 +1,6 @@
 # camera id position image [depth_map nb_labels range]
 
 camera 1 0.0 pm/PM-2.pgm pm/PM-2_dm.pgm 25 10.0
+#camera 1 0.0 plouf.pgm
+#camera 1 0.0 white.pgm
+#camera 2 1.0 pm/PM-2.pgm pm/PM-2_dm.pgm 25 10.0

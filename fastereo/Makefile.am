@@ -7,8 +7,8 @@ fastereo_SOURCES = fastereo.c \
 		   utils.c \
 		   img.c
 fastereo_LDADD = xtdio.a
-fastereo_LDADD += @GLUT_LIBS@
 fastereo_LDADD += @GL_LIBS@
+fastereo_LDADD += -lm
 
 DOXYGEN = @DOXYGEN@
 DOXYCONFIG = doxygen.config
