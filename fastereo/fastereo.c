@@ -1,10 +1,10 @@
 /*
- * File:     $Source: /home/xubuntu/berlios_backup/github/tmp-cvs/fastereo/Repository/fastereo/fastereo.c,v $
+ * File:     $RCSfile: fastereo.c,v $
  * Author:   Jean-François LE BERRE (leberrej@iro.umontreal.ca)
  *               from University of Montreal
- * Date:     $Date: 2004/04/13 18:59:04 $
- * Version:  $Revision: 1.3 $
- * ID:       $Id: fastereo.c,v 1.3 2004/04/13 18:59:04 arutha Exp $
+ * Date:     $Date: 2004/04/13 19:00:32 $
+ * Version:  $Revision: 1.4 $
+ * ID:       $Id: fastereo.c,v 1.4 2004/04/13 19:00:32 arutha Exp $
  * Comments:
  */
 
